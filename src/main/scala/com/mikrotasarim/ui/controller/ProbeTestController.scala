@@ -26,10 +26,16 @@ object ProbeTestController {
   val psc = PowerSourceController
   val rvc = ReferenceValueController
 
-  private def currentControlTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+  private def reset(): Unit = {
+    dc.putAsicOnReset()
+    dc.putFpgaOnReset()
     dc.takeFpgaOffReset()
     dc.takeAsicOffReset()
+  }
+
+  private def currentControlTest(): (Boolean, String) = {
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    reset()
     val current = psc.measureCurrent()
     if (rvc.checkCurrent(current)) {
       (true, "")
@@ -40,7 +46,14 @@ object ProbeTestController {
 
   private def serialInterfaceTest(): (Boolean, String) = {
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
-    (false, "Not Implemented Yet\n")
+    reset()
+    dc.writeToAsicMemoryTop(0x59, 0xabcd)
+    val read = dc.readFromAsicMemoryTop(0x59)
+    if (read == 0xabcd) {
+      (true, "")
+    } else {
+      (false, read + "read\n")
+    }
   }
 
   private def memoryTest(): (Boolean, String) = {
