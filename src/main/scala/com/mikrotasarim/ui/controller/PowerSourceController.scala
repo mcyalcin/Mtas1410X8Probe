@@ -9,7 +9,7 @@ object PowerSourceController {
 
   var serialPort: SerialPort = _
 
-  def MeasureCurrent() = {
+  def measureCurrent() = {
     serialPort.writeString("MEAS:CURR?\n")
     Thread.sleep(300)
     serialPort.readString().toDouble

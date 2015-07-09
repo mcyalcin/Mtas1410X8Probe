@@ -21,75 +21,85 @@ object ProbeTestController {
     new ProbeTestCase("ROIC Programming Test", roicProgrammingTest)
   )
   
-  val bc = FpgaController
+  val fc = FpgaController
+  def dc = fc.deviceController
+  val psc = PowerSourceController
+  val rvc = ReferenceValueController
 
   private def currentControlTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
-    (false, "Not Implemented Yet\n")
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    dc.takeFpgaOffReset()
+    dc.takeAsicOffReset()
+    val current = psc.measureCurrent()
+    if (rvc.checkCurrent(current)) {
+      (true, "")
+    } else {
+      (false, current + " A\n")
+    }
   }
 
   private def serialInterfaceTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def memoryTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def powerConsumptionTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def timingGeneratorTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def outputTimingGeneratorTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def outputChannelTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def adcChannelFunctionalityTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def pgaFunctionalityTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def inputDriverTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def pgaGainTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def adcChannelLinearityTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def adcChannelNoiseTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoic)
     (false, "Not Implemented Yet\n")
   }
 
   private def roicProgrammingTest(): (Boolean, String) = {
-    bc.deployBitfile(bc.Bitfile.WithRoic)
+    fc.deployBitfile(fc.Bitfile.WithRoic)
     (false, "Not Implemented Yet\n")
   }
 
