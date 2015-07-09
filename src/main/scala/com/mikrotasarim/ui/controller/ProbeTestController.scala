@@ -2,6 +2,9 @@ package com.mikrotasarim.ui.controller
 
 import com.mikrotasarim.ui.model.ProbeTestCase
 
+import scala.StringBuilder
+import scala.collection.mutable
+
 object ProbeTestController {
 
   val testCases = Seq(
@@ -20,9 +23,11 @@ object ProbeTestController {
     new ProbeTestCase("ADC Channel Noise Test", adcChannelNoiseTest),
     new ProbeTestCase("ROIC Programming Test", roicProgrammingTest)
   )
-  
+
   val fc = FpgaController
+
   def dc = fc.deviceController
+
   val psc = PowerSourceController
   val rvc = ReferenceValueController
 
@@ -57,8 +62,51 @@ object ProbeTestController {
   }
 
   private def memoryTest(): (Boolean, String) = {
+    import spire.implicits._
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
-    (false, "Not Implemented Yet\n")
+    reset()
+    val topAddresses = (0 to 255).filterNot(p => p == 0x6d || p == 0x74)
+    val botAddresses = 0 to 127
+    for (i <- topAddresses) dc.writeToAsicMemoryTop(i, 0)
+    for (i <- botAddresses) dc.writeToAsicMemoryBot(i, 0)
+    val errors = new StringBuilder()
+    for (i <- topAddresses) {
+      dc.writeToAsicMemoryTop(i, 0xffff)
+      val read = dc.readFromAsicMemoryTop(i)
+      for (j <- 0 to 15) {
+        if ((read / (2 pow j)) % 2 != 1) {
+          errors.append("Top (" + i + ", " + j + ") failed to toggle from 0 to 1\n")
+        }
+      }
+    }
+    for (i <- botAddresses) {
+      dc.writeToAsicMemoryBot(i, 0xffff)
+      val read = dc.readFromAsicMemoryTop(i)
+      for (j <- 0 to 15) {
+        if ((read / (2 pow j)) % 2 != 1) {
+          errors.append("Bottom (" + i + ", " + j + ") failed to toggle from 0 to 1\n")
+        }
+      }
+    }
+    for (i <- topAddresses) {
+      dc.writeToAsicMemoryTop(i, 0)
+      val read = dc.readFromAsicMemoryTop(i)
+      for (j <- 0 to 15) {
+        if ((read / (2 pow j)) % 2 != 0) {
+          errors.append("Top (" + i + ", " + j + ") failed to toggle from 1 to 0\n")
+        }
+      }
+    }
+    for (i <- botAddresses) {
+      dc.writeToAsicMemoryBot(i, 0)
+      val read = dc.readFromAsicMemoryBot(i)
+      for (j <- 0 to 15) {
+        if ((read / (2 pow j)) % 2 != 0) {
+          errors.append("Bottom (" + i + ", " + j + ") failed to toggle from 1 to 0\n")
+        }
+      }
+    }
+    (errors.toString().isEmpty, errors.toString())
   }
 
   private def powerConsumptionTest(): (Boolean, String) = {
