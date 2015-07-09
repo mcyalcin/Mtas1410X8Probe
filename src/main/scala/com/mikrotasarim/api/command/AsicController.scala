@@ -122,6 +122,25 @@ class AsicController(device: DeviceInterface) {
     device.setWireInValue(resetWire, mask * 2 pow fifoResetOffset, 0xff * 2 pow fifoResetOffset)
     device.updateWireIns()
   }
+
+  def readStatusRegister(): Long = {
+    setWiresAndTrigger(Map(
+      commandWire -> readStatusRegisterCommand
+    ))
+    device.getWireOutValue(readWire)
+  }
+
+  def softResetAsic(): Unit = {
+    setWiresAndTrigger(Map(
+      commandWire -> softResetAsicCommand
+    ))
+  }
+
+  def softResetRoic(): Unit = {
+    setWiresAndTrigger(Map(
+      commandWire -> softResetRoicCommand
+    ))
+  }
 }
 
 object ApiConstants {
@@ -151,6 +170,9 @@ object ApiConstants {
   val readFromRoicMemoryCommand = 0xc6
   val writeToPixelProcessorMemoryCommand = 0xca
   val initializeAsicCommand = 0xcc
+  val readStatusRegisterCommand = 0xb0
+  val softResetAsicCommand = 0xa0
+  val softResetRoicCommand = 0xa1
 
   val fpgaReset = 0
   val asicReset = 1
