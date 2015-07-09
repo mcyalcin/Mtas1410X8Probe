@@ -4,6 +4,8 @@ import com.mikrotasarim.api.command.AsicController
 import com.mikrotasarim.api.device.OpalKellyInterface
 import com.mikrotasarim.ui.controller.FpgaController.Bitfile.Bitfile
 
+import scalafx.beans.property.StringProperty
+
 object FpgaController {
 
   var device: OpalKellyInterface = _
@@ -28,4 +30,11 @@ object FpgaController {
       deployedBitfile = bf
     }
   }
+
+  def readStatusRegister(): Unit = {
+    val status = deviceController.readStatusRegister()
+    statusRegister.set(status.toString)
+  }
+
+  val statusRegister = StringProperty("")
 }

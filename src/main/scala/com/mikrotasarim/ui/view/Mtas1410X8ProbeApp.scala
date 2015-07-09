@@ -1,6 +1,6 @@
 package com.mikrotasarim.ui.view
 
-import com.mikrotasarim.ui.controller.{OutputController, PowerSourceController, ProbeTestController}
+import com.mikrotasarim.ui.controller.{FpgaController, OutputController, PowerSourceController, ProbeTestController}
 
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
@@ -135,6 +135,17 @@ object Mtas1410X8ProbeApp extends JFXApp {
               PowerSourceController.setRemote()
             }
           }
+        )
+      },
+      new Separator,
+      new Button("Memory Map"),
+      new HBox {
+        spacing = 10
+        content = List(
+          new Button("Read Status Register") {
+            onAction = handle { FpgaController.readStatusRegister() }
+          },
+          new Label {text <== FpgaController.statusRegister}
         )
       }
     )
