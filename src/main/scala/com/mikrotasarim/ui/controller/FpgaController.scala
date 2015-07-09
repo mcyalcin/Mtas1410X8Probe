@@ -1,14 +1,14 @@
 package com.mikrotasarim.ui.controller
 
 import com.mikrotasarim.api.command.AsicController
-import com.mikrotasarim.api.device.OpalKellyInterface
+import com.mikrotasarim.api.device.{DeviceInterface, ConsoleMockDeviceInterface, OpalKellyInterface}
 import com.mikrotasarim.ui.controller.FpgaController.Bitfile.Bitfile
 
-import scalafx.beans.property.StringProperty
+import scalafx.beans.property.{BooleanProperty, StringProperty}
 
 object FpgaController {
 
-  var device: OpalKellyInterface = _
+  var device: DeviceInterface = _
   var deviceController: AsicController = _
 
   object Bitfile extends Enumeration {
@@ -21,11 +21,15 @@ object FpgaController {
     Bitfile.WithRoic -> "withRoic.bit"
   )
 
-  private var deployedBitfile: Bitfile = Bitfile.None
+  var deployedBitfile: Bitfile = Bitfile.None
 
   def deployBitfile(bf: Bitfile): Unit = {
     if (bf != deployedBitfile) {
-      device = new OpalKellyInterface(bitfileMap(bf))
+      if (testMode.value) {
+        device = new ConsoleMockDeviceInterface()
+      } else {
+        device = new OpalKellyInterface(bitfileMap(bf))
+      }
       deviceController = new AsicController(device)
       deployedBitfile = bf
     }
@@ -37,4 +41,5 @@ object FpgaController {
   }
 
   val statusRegister = StringProperty("")
+  val testMode = BooleanProperty(value = false)
 }

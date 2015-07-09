@@ -1,6 +1,7 @@
 package com.mikrotasarim.ui.view
 
 import com.mikrotasarim.ui.controller.{FpgaController, OutputController, PowerSourceController, ProbeTestController}
+import com.mikrotasarim.ui.model.MemoryMap
 
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
@@ -19,6 +20,7 @@ object Mtas1410X8ProbeApp extends JFXApp {
 
   stage = new PrimaryStage {
     title = "Mikro-Tasarim MTAS1410X8 Probe Test App"
+    width = 1100
   }
 
   stage.scene = new Scene {
@@ -37,7 +39,7 @@ object Mtas1410X8ProbeApp extends JFXApp {
   private def createTestColumn: Node = new VBox {
     padding = Insets(10)
     spacing = 10
-    content = createTests //:+ new Button("Run All") { onAction = handle {model.runAll()}}
+    content = createTests
   }
 
   private def createTests: Seq[Node] = {
@@ -138,7 +140,12 @@ object Mtas1410X8ProbeApp extends JFXApp {
         )
       },
       new Separator,
-      new Button("Memory Map"),
+      new Button("Memory Map") {
+        onAction = handle {
+          MemoryMap.readAsicMemory()
+          MemoryMapStage.show()
+        }
+      },
       new HBox {
         spacing = 10
         content = List(
@@ -147,6 +154,10 @@ object Mtas1410X8ProbeApp extends JFXApp {
           },
           new Label {text <== FpgaController.statusRegister}
         )
+      },
+      new Separator,
+      new CheckBox("Self Test Mode") {
+        selected <==> FpgaController.testMode
       }
     )
   }
@@ -171,7 +182,6 @@ object Mtas1410X8ProbeApp extends JFXApp {
       new TextField {
         prefWidth = 150
         text <==> OutputController.outputPath
-        promptText = "./"
       }
     )
   }

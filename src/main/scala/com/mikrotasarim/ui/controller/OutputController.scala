@@ -11,7 +11,7 @@ object OutputController {
   val comment = StringProperty("")
   val dieNumber = StringProperty("1")
   val waferId = StringProperty("Wafer")
-  val outputPath = StringProperty("")
+  val outputPath = StringProperty("./")
 
   def saveAndProceed(): Unit = {
     val folder = outputPath.value + "/" + waferId.value + "/Die" + dieNumber.value
