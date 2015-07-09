@@ -2,6 +2,8 @@ package com.mikrotasarim.api.command
 
 import com.mikrotasarim.api.device.DeviceInterface
 
+import spire.implicits._
+
 class AsicController(device: DeviceInterface) {
 
   import ApiConstants._
@@ -88,13 +90,38 @@ class AsicController(device: DeviceInterface) {
     device.getWireOutValue(readWire)
   }
 
-  def writeToPixelProcessorMemory = _
-  def putFpgaOnReset = _
-  def takeFpgaOffReset = _
-  def putAsicOnReset = _
-  def takeAsicOffReset = _
-  def putFifosOnReset = _
-  def takeFifosOffReset(mask: Int) = _
+  def writeToPixelProcessorMemory(address: Int, value: Long): Unit = {
+    setWiresAndTrigger(Map(
+      commandWire -> writeToPixelProcessorMemoryCommand,
+      addressWire -> address,
+      dataWire -> value
+    ))
+  }
+
+  def putFpgaOnReset(): Unit = {
+    device.setWireInValue(resetWire, 2 pow fpgaReset, 2 pow fpgaReset)
+    device.updateWireIns()
+  }
+
+  def takeFpgaOffReset(): Unit = {
+    device.setWireInValue(resetWire, 0, 2 pow fpgaReset)
+    device.updateWireIns()
+  }
+
+  def putAsicOnReset(): Unit = {
+    device.setWireInValue(resetWire, 2 pow asicReset, 2 pow asicReset)
+    device.updateWireIns()
+  }
+
+  def takeAsicOffReset(): Unit = {
+    device.setWireInValue(resetWire, 0, 2 pow asicReset)
+    device.updateWireIns()
+  }
+
+  def setFifosResets(mask: Int): Unit = {
+    device.setWireInValue(resetWire, mask * 2 pow fifoResetOffset, 0xff * 2 pow fifoResetOffset)
+    device.updateWireIns()
+  }
 }
 
 object ApiConstants {
@@ -122,5 +149,10 @@ object ApiConstants {
   val readFromAsicMemoryBotCommand = 0xc3
   val writeToRoicMemoryCommand = 0xc5
   val readFromRoicMemoryCommand = 0xc6
+  val writeToPixelProcessorMemoryCommand = 0xca
   val initializeAsicCommand = 0xcc
+
+  val fpgaReset = 0
+  val asicReset = 1
+  val fifoResetOffset = 2
 }
