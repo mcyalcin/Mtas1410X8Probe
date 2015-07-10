@@ -50,6 +50,15 @@ class AsicController(device: DeviceInterface) {
     ))
   }
 
+  def writeToAsicMemoryTopMasked(address: Int, value: Long, mask: Long): Unit = {
+    // TODO: Implement mask
+    setWiresAndTrigger(Map(
+      commandWire -> writeToAsicMemoryTopCommand,
+      addressWire -> address,
+      dataWire -> value
+    ))
+  }
+
   def writeToAsicMemoryBot(address: Int, value: Long): Unit = {
     setWiresAndTrigger(Map(
       commandWire -> writeToAsicMemoryBotCommand,

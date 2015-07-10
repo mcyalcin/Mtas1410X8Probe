@@ -2,9 +2,6 @@ package com.mikrotasarim.ui.controller
 
 import com.mikrotasarim.ui.model.ProbeTestCase
 
-import scala.StringBuilder
-import scala.collection.mutable
-
 object ProbeTestController {
 
   val testCases = Seq(
@@ -230,16 +227,118 @@ object ProbeTestController {
 
   private def timingGeneratorTest(): (Boolean, String) = {
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
-    (false, "Not Implemented Yet\n")
+    reset()
+    dc.initializeAsic()
+    dc.writeToAsicMemoryTop(0x0a, 0x0040)
+    dc.writeToAsicMemoryTop(0x0d, 0x0040)
+    dc.writeToAsicMemoryTop(0x16, 0x000e)
+    for (i <- 0 to 15) {
+      val status = dc.readStatusRegister()
+      if (status % 4 != 3) return (false, status + "\n")
+    }
+    (true, "")
   }
 
   private def outputTimingGeneratorTest(): (Boolean, String) = {
+    val errors = new StringBuilder
+
+    def statusFail = (for (i <- 0 to 15) yield {
+      val status = dc.readStatusRegister()
+      if ((status / 4) % 2 != 1) true else false
+    }).contains(true)
+
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
-    (false, "Not Implemented Yet\n")
+    reset()
+    dc.initializeAsic()
+
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0041, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(0x96, 0x0012, 0x00ff)
+    dc.writeToAsicMemoryTop(0x102, 0)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    if (statusFail) errors.append("Failed at 80 Mhz\n")
+
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0042, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(0x96, 0x0018, 0x00ff)
+    dc.writeToAsicMemoryTop(0x102, 0)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    if (statusFail) errors.append("Failed at 100 Mhz\n")
+
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0044, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(0x96, 0x0026, 0x00ff)
+    dc.writeToAsicMemoryTop(0x102, 0)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    if (statusFail) errors.append("Failed at 140 Mhz\n")
+
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0045, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(0x96, 0x002e, 0x00ff)
+    dc.writeToAsicMemoryTop(0x102, 0)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    if (statusFail) errors.append("Failed at 160 Mhz\n")
+
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0082, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(0x96, 0x0038, 0x00ff)
+    dc.writeToAsicMemoryTop(0x102, 0x0202)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    if (statusFail) errors.append("Failed at 200 Mhz\n")
+
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0085, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(0x96, 0x0058, 0x00ff)
+    dc.writeToAsicMemoryTop(0x102, 0x0205)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    if (statusFail) errors.append("Failed at 320 Mhz\n")
+
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0087, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(0x96, 0x0085, 0x00ff)
+    dc.writeToAsicMemoryTop(0x102, 0x0205)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    if (statusFail) errors.append("Failed at 400 Mhz\n")
+
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x008b, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(0x96, 0x00c9, 0x00ff)
+    dc.writeToAsicMemoryTop(0x102, 0x0207)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    if (statusFail) errors.append("Failed at 560 Mhz\n")
+
+    (errors.toString().isEmpty, errors.toString())
   }
 
   private def outputChannelTest(): (Boolean, String) = {
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    reset()
+    dc.initializeAsic()
+    // stage1
+    dc.writeToAsicMemoryTop(0x1f, 0xaa3c)
+    dc.writeToAsicMemoryTop(0x2c, 0x552d)
+    dc.writeToAsicMemoryTopMasked(0x28, 0x0800, 0x0800)
+    // TODO: profit?
+    // stage2
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0041, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(0x96, 0x0012, 0x00ff)
+    dc.writeToAsicMemoryTop(0x102, 0)
+    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    dc.writeToAsicMemoryTopMasked(0x40, 0x0000, 0xff00)
+    dc.writeToAsicMemoryTop(0x24, 0x0f00)
+    dc.writeToAsicMemoryTop(0x27, 0x01fe)
+    dc.writeToAsicMemoryTop(0x28, 0x0084)
+    dc.writeToAsicMemoryTop(0x29, 0x000f)
+    dc.writeToAsicMemoryTop(0x30, 0x0f0f)
+    dc.writeToAsicMemoryTop(0x88, 0x0ff0)
+    dc.writeToAsicMemoryTop(0x91, 0x01fe)
+    dc.writeToAsicMemoryTop(0x92, 0x0108)
+    dc.writeToAsicMemoryTop(0x93, 0x0050)
+    dc.writeToAsicMemoryTop(0x94, 0x000f)
+    dc.writeToAsicMemoryTop(0x10, 0x0040)
+    dc.writeToAsicMemoryTop(0x13, 0x0040)
+    dc.writeToAsicMemoryTop(0x22, 0x000e)
+    // TODO: profit?
     (false, "Not Implemented Yet\n")
   }
 
