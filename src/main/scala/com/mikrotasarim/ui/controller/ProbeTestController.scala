@@ -55,7 +55,7 @@ object ProbeTestController {
     if (read == 0xabcd) {
       (true, "")
     } else {
-      (false, read + "read\n")
+      (false, read.toHexString + " read\n")
     }
   }
 

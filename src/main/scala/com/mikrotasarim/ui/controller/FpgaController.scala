@@ -36,6 +36,7 @@ object FpgaController {
   }
 
   def readStatusRegister(): Unit = {
+    if (deployedBitfile == Bitfile.None) deployBitfile(Bitfile.WithoutRoic)
     val status = deviceController.readStatusRegister()
     statusRegister.set(status.toString)
   }
