@@ -51,11 +51,10 @@ class AsicController(device: DeviceInterface) {
   }
 
   def writeToAsicMemoryTopMasked(address: Int, value: Long, mask: Long): Unit = {
-    // TODO: Implement mask
     setWiresAndTrigger(Map(
       commandWire -> writeToAsicMemoryTopCommand,
       addressWire -> address,
-      dataWire -> value
+      dataWire -> value + 0x100 * mask
     ))
   }
 
@@ -127,8 +126,8 @@ class AsicController(device: DeviceInterface) {
     device.updateWireIns()
   }
 
-  def setFifosResets(mask: Int): Unit = {
-    device.setWireInValue(resetWire, mask * 2 pow fifoResetOffset, 0xff * 2 pow fifoResetOffset)
+  def setFifosResets(config: Int): Unit = {
+    device.setWireInValue(resetWire, config * 2 pow fifoResetOffset, 0xff * 2 pow fifoResetOffset)
     device.updateWireIns()
   }
 
@@ -150,6 +149,29 @@ class AsicController(device: DeviceInterface) {
       commandWire -> softResetRoicCommand
     ))
   }
+
+  def readData(length: Int): Seq[Array[Long]] = {
+    def convertToWords(bytes: Array[Byte]): Array[Long] = {
+      (for (i <- 0 until length) yield {
+        ((bytes((4 * i) + 0) + 256) % 256) +
+        ((bytes((4 * i) + 1) + 256) % 256) * 256l +
+        ((bytes((4 * i) + 2) + 256) % 256) * 256l * 256l +
+        ((bytes((4 * i) + 3) + 256) % 256) * 256l * 256l * 256l
+      }).toArray
+    }
+
+    val lengthInBytes = length * 4
+    setWiresAndTrigger(Map(
+      commandWire -> readDataCommand,
+      addressWire -> 0xff,
+      dataWire -> lengthInBytes
+    ))
+    val output: Array[Array[Byte]] = Array.ofDim[Byte](8, lengthInBytes)
+    for (i <- 0 to 7) yield {
+      device.readFromPipeOut(outputPipe(i), lengthInBytes, output(i))
+      convertToWords(output(i))
+    }
+  }
 }
 
 object ApiConstants {
@@ -167,9 +189,7 @@ object ApiConstants {
 
   val triggerWire = 0x40
 
-  val flashFifoInPipe = 0x80
-
-  val flashFifoOutPipe = 0xa0
+  val outputPipe = (i: Int) => i + 0xa0
 
   val writeToAsicMemoryTopCommand = 0xc0
   val readFromAsicMemoryTopCommand = 0xc1
@@ -182,6 +202,7 @@ object ApiConstants {
   val readStatusRegisterCommand = 0xb0
   val softResetAsicCommand = 0xa0
   val softResetRoicCommand = 0xa1
+  val readDataCommand = 0xd0
 
   val fpgaReset = 0
   val asicReset = 1

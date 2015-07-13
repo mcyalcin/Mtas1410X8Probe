@@ -311,6 +311,8 @@ object ProbeTestController {
   }
 
   private def outputChannelTest(): (Boolean, String) = {
+    val errors = new StringBuilder
+
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
     reset()
     dc.initializeAsic()
@@ -318,7 +320,14 @@ object ProbeTestController {
     dc.writeToAsicMemoryTop(0x1f, 0xaa3c)
     dc.writeToAsicMemoryTop(0x2c, 0x552d)
     dc.writeToAsicMemoryTopMasked(0x28, 0x0800, 0x0800)
-    // TODO: profit?
+    dc.setFifosResets(0xff)
+    val outputs = dc.readData(1)
+    for (i <- 0 until 3) {
+      if (outputs(i)(0) != 0xaa3c) errors.append("Top " + i + " fail: " + outputs(i)(0).toHexString + " read, 0xaa3c expected\n")
+    }
+    for (i <- 0 until 3) {
+      if (outputs(i + 4)(0) != 0x552d) errors.append("Bottom " + i + " fail: " + outputs(i + 4)(0).toHexString + " read, 0x552d expected\n")
+    }
     // stage2
     dc.writeToAsicMemoryTopMasked(0x95, 0x0041, 0x00ff)
     dc.writeToAsicMemoryTopMasked(0x96, 0x0012, 0x00ff)
@@ -338,8 +347,25 @@ object ProbeTestController {
     dc.writeToAsicMemoryTop(0x10, 0x0040)
     dc.writeToAsicMemoryTop(0x13, 0x0040)
     dc.writeToAsicMemoryTop(0x22, 0x000e)
-    // TODO: profit?
-    (false, "Not Implemented Yet\n")
+    dc.setFifosResets(0xff)
+
+    val referenceValues = Seq(
+      3686, 5939, 10444, 12697, 14950, 11571, 4812, 1433
+    )
+
+    for (muxShift <- 0 to 7) {
+      for (outputIndex <- 0 to 7) {
+        dc.writeToPixelProcessorMemory(2*outputIndex, (outputIndex - muxShift) % 8)
+      }
+      dc.readData(16)
+      val output = dc.readData(16)
+      for (i <- 0 to 7) {
+        val out = output(i).sum / 16
+        val ref = referenceValues(i - muxShift)
+        if (math.abs(out - ref) > 500) errors.append("Output " + i + " read " + out + " expected " + ref + " at mux shift " + muxShift + "\n")
+      }
+    }
+    (errors.toString().isEmpty, errors.toString())
   }
 
   private def adcChannelFunctionalityTest(): (Boolean, String) = {
