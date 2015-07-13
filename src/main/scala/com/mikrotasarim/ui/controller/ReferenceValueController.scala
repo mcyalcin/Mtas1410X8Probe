@@ -1,6 +1,10 @@
 package com.mikrotasarim.ui.controller
 
+//import scala.io.Source
+
 object ReferenceValueController {
+
+//  val input = Source fromFile "ref.conf" getLines()
 
   val noiseTreshold = 100
 
