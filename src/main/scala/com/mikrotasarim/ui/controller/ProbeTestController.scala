@@ -435,6 +435,8 @@ object ProbeTestController {
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
     reset()
     dc.initializeAsic()
+    dc.setFifosResets(0xff)
+
     dc.writeToAsicMemoryTop(0x46, 0x0005)
     dc.writeToAsicMemoryTop(0x10, 0x0040)
     dc.writeToAsicMemoryTop(0x13, 0x0040)
@@ -454,13 +456,11 @@ object ProbeTestController {
     dc.writeToAsicMemoryTop(0x92, 0x0210)
     dc.writeToAsicMemoryTop(0x93, 0x000f)
     dc.writeToAsicMemoryTop(0x94, 0x0f0f)
-    dc.setFifosResets(0xff)
 
     val out = dc.readData(16).map(l => l.sum / 16)
     val ref = Seq(3686, 5939, 10444, 12697, 12697, 10444, 5939, 3686)
     val errors = new StringBuilder
     for (i <- 0) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + " in Stage 1\n")
-    (errors.toString().isEmpty, errors.toString())
 
     dc.writeToAsicMemoryTop(0x46, 0x0005)
     dc.writeToAsicMemoryTop(0x10, 0x0040)
@@ -481,7 +481,6 @@ object ProbeTestController {
     dc.writeToAsicMemoryTop(0x92, 0x0000)
     dc.writeToAsicMemoryTop(0x93, 0x0050)
     dc.writeToAsicMemoryTop(0x94, 0x000f)
-    dc.setFifosResets(0xff)
 
     val out2 = dc.readData(16).map(l => l.sum / 16)
     val ref2 = Seq(1433, 4812, 11571, 14950, 14950, 11571, 4812, 1433)
@@ -491,7 +490,96 @@ object ProbeTestController {
 
   private def pgaGainTest(): (Boolean, String) = {
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
-    (false, "Not Implemented Yet\n")
+    reset()
+    dc.initializeAsic()
+    dc.setFifosResets(0xff)
+
+    val out = Array.ofDim[Long](3,3,8)
+    val ref = Array(Array(6182, 5177, 4172), Array(8192, 8192, 8192), Array(10311, 11371, 12431))
+    val errors = new StringBuilder
+
+    dc.writeToAsicMemoryTop(0x46, 0x0005)
+    dc.writeToAsicMemoryTop(0x10, 0x0040)
+    dc.writeToAsicMemoryTop(0x13, 0x0040)
+    dc.writeToAsicMemoryTop(0x22, 0x000e)
+    dc.writeToAsicMemoryTop(0x95, 0x0141)
+    dc.writeToAsicMemoryTop(0x24, 0x0ff0)
+    dc.writeToAsicMemoryTop(0x25, 0x0000)
+    dc.writeToAsicMemoryTop(0x26, 0x0233)
+    dc.writeToAsicMemoryTop(0x27, 0x01fe)
+    dc.writeToAsicMemoryTop(0x28, 0x0042)
+    dc.writeToAsicMemoryTop(0x29, 0x00f0)
+    dc.writeToAsicMemoryTop(0x30, 0x000f)
+    dc.writeToAsicMemoryTop(0x88, 0x0ff0)
+    dc.writeToAsicMemoryTop(0x89, 0x0000)
+    dc.writeToAsicMemoryTop(0x90, 0x0233)
+    dc.writeToAsicMemoryTop(0x91, 0x01fe)
+    dc.writeToAsicMemoryTop(0x92, 0x0042)
+    dc.writeToAsicMemoryTop(0x93, 0x00f0)
+    dc.writeToAsicMemoryTop(0x94, 0x000f)
+
+    dc.writeToAsicMemoryTop(0x86, 0x5623)
+    out(0)(0) = dc.readData(16).map(l => l.sum / 16).toArray
+    dc.writeToAsicMemoryTop(0x86, 0x58ba)
+    out(0)(1) = dc.readData(16).map(l => l.sum / 16).toArray
+    dc.writeToAsicMemoryTop(0x86, 0x5b79)
+    out(0)(2) = dc.readData(16).map(l => l.sum / 16).toArray
+
+    dc.writeToAsicMemoryTop(0x24, 0x0ff0)
+    dc.writeToAsicMemoryTop(0x25, 0x0000)
+    dc.writeToAsicMemoryTop(0x26, 0x0233)
+    dc.writeToAsicMemoryTop(0x27, 0x01fe)
+    dc.writeToAsicMemoryTop(0x28, 0x0042)
+    dc.writeToAsicMemoryTop(0x29, 0x0050)
+    dc.writeToAsicMemoryTop(0x30, 0x000f)
+    dc.writeToAsicMemoryTop(0x88, 0x0ff0)
+    dc.writeToAsicMemoryTop(0x89, 0x0000)
+    dc.writeToAsicMemoryTop(0x90, 0x0233)
+    dc.writeToAsicMemoryTop(0x91, 0x01fe)
+    dc.writeToAsicMemoryTop(0x92, 0x0042)
+    dc.writeToAsicMemoryTop(0x93, 0x0050)
+    dc.writeToAsicMemoryTop(0x94, 0x000f)
+
+    dc.writeToAsicMemoryTop(0x86, 0x5623)
+    out(1)(0) = dc.readData(16).map(l => l.sum / 16).toArray
+    dc.writeToAsicMemoryTop(0x86, 0x58ba)
+    out(1)(1) = dc.readData(16).map(l => l.sum / 16).toArray
+    dc.writeToAsicMemoryTop(0x86, 0x5b79)
+    out(1)(2) = dc.readData(16).map(l => l.sum / 16).toArray
+
+    dc.writeToAsicMemoryTop(0x24, 0x0ff0)
+    dc.writeToAsicMemoryTop(0x25, 0x0000)
+    dc.writeToAsicMemoryTop(0x26, 0x0233)
+    dc.writeToAsicMemoryTop(0x27, 0x01fe)
+    dc.writeToAsicMemoryTop(0x28, 0x0042)
+    dc.writeToAsicMemoryTop(0x29, 0x0000)
+    dc.writeToAsicMemoryTop(0x30, 0x000f)
+    dc.writeToAsicMemoryTop(0x88, 0x0ff0)
+    dc.writeToAsicMemoryTop(0x89, 0x0000)
+    dc.writeToAsicMemoryTop(0x90, 0x0233)
+    dc.writeToAsicMemoryTop(0x91, 0x01fe)
+    dc.writeToAsicMemoryTop(0x92, 0x0042)
+    dc.writeToAsicMemoryTop(0x93, 0x0000)
+    dc.writeToAsicMemoryTop(0x94, 0x000f)
+
+    dc.writeToAsicMemoryTop(0x86, 0x5623)
+    out(2)(0) = dc.readData(16).map(l => l.sum / 16).toArray
+    dc.writeToAsicMemoryTop(0x86, 0x58ba)
+    out(2)(1) = dc.readData(16).map(l => l.sum / 16).toArray
+    dc.writeToAsicMemoryTop(0x86, 0x5b79)
+    out(2)(2) = dc.readData(16).map(l => l.sum / 16).toArray
+
+    val g = Map(0 -> "low", 1 -> "medium", 2 -> "high")
+
+    for (stage <- 0 to 2)
+      for (gain <- 0 to 2)
+        for (output <- 0 to 7) {
+          val o = out(stage)(gain)(output)
+          val r = ref(stage)(gain)
+          if (math.abs(o-r) > 200) errors.append("Output " + output + " read " + o + " expected " + r + " at stage " + (stage + 1) + " with " + g(gain) + " gain\n")
+        }
+
+    (errors.toString().isEmpty, errors.toString())
   }
 
   private def adcChannelLinearityTest(): (Boolean, String) = {
