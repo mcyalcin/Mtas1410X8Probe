@@ -735,7 +735,19 @@ object ProbeTestController {
 
   private def roicProgrammingTest(): (Boolean, String) = {
     fc.deployBitfile(fc.Bitfile.WithRoic)
-    (false, "Not Implemented Yet\n")
+    reset()
+    dc.initializeAsic()
+
+    val out0 = dc.readFromRoicMemory(0x0f)
+    dc.writeToRoicMemory(0x0f, 0xabcd)
+    val out1 = dc.readFromRoicMemory(0x0f)
+
+    val errors = new StringBuilder
+
+    if (out0 != 0) errors.append("First read " + out0 + "\n")
+    if (out1 != 0xabcd) errors.append("Second read " + out1 + "\n")
+
+    (errors.toString().isEmpty, errors.toString())
   }
 
   def runAll(): Unit = {
