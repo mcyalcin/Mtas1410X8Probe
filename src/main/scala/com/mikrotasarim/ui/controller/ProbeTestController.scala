@@ -401,7 +401,34 @@ object ProbeTestController {
 
   private def pgaFunctionalityTest(): (Boolean, String) = {
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
-    (false, "Not Implemented Yet\n")
+    reset()
+    dc.initializeAsic()
+    dc.writeToAsicMemoryTop(0x46, 0x0005)
+    dc.writeToAsicMemoryTop(0x10, 0x0040)
+    dc.writeToAsicMemoryTop(0x13, 0x0040)
+    dc.writeToAsicMemoryTop(0x22, 0x000e)
+    dc.writeToAsicMemoryTop(0x95, 0x0141)
+    dc.writeToAsicMemoryTop(0x24, 0x0ff0)
+    dc.writeToAsicMemoryTop(0x25, 0x0000)
+    dc.writeToAsicMemoryTop(0x26, 0x0233)
+    dc.writeToAsicMemoryTop(0x27, 0x01fe)
+    dc.writeToAsicMemoryTop(0x28, 0x0108)
+    dc.writeToAsicMemoryTop(0x29, 0x0050)
+    dc.writeToAsicMemoryTop(0x30, 0x000f)
+    dc.writeToAsicMemoryTop(0x88, 0x0ff0)
+    dc.writeToAsicMemoryTop(0x89, 0x0000)
+    dc.writeToAsicMemoryTop(0x90, 0x0233)
+    dc.writeToAsicMemoryTop(0x91, 0x01fe)
+    dc.writeToAsicMemoryTop(0x92, 0x0108)
+    dc.writeToAsicMemoryTop(0x93, 0x0050)
+    dc.writeToAsicMemoryTop(0x94, 0x000f)
+    dc.setFifosResets(0xff)
+
+    val out = dc.readData(16).map(l => l.sum / 16)
+    val ref = Seq(1433, 4812, 11571, 14950, 14950, 11571, 4812, 1433)
+    val errors = new StringBuilder
+    for (i <- 0) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + "\n")
+    (errors.toString().isEmpty, errors.toString())
   }
 
   private def inputDriverTest(): (Boolean, String) = {
