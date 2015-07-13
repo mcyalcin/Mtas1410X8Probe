@@ -584,7 +584,36 @@ object ProbeTestController {
 
   private def adcChannelLinearityTest(): (Boolean, String) = {
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
-    (false, "Not Implemented Yet\n")
+    reset()
+    dc.initializeAsic()
+    dc.setFifosResets(0xff)
+
+    dc.writeToAsicMemoryTop(0x46, 0x0005)
+    dc.writeToAsicMemoryTop(0x10, 0x0040)
+    dc.writeToAsicMemoryTop(0x13, 0x0040)
+    dc.writeToAsicMemoryTop(0x22, 0x000e)
+    dc.writeToAsicMemoryTop(0x95, 0x0141)
+    dc.writeToAsicMemoryTop(0x24, 0x0ff0)
+    dc.writeToAsicMemoryTop(0x25, 0x0000)
+    dc.writeToAsicMemoryTop(0x26, 0x0233)
+    dc.writeToAsicMemoryTop(0x27, 0x01fe)
+    dc.writeToAsicMemoryTop(0x28, 0x0042)
+    dc.writeToAsicMemoryTop(0x29, 0x0000)
+    dc.writeToAsicMemoryTop(0x30, 0x000f)
+    dc.writeToAsicMemoryTop(0x88, 0x0ff0)
+    dc.writeToAsicMemoryTop(0x89, 0x0000)
+    dc.writeToAsicMemoryTop(0x90, 0x0233)
+    dc.writeToAsicMemoryTop(0x91, 0x01fe)
+    dc.writeToAsicMemoryTop(0x92, 0x0042)
+    dc.writeToAsicMemoryTop(0x93, 0x0000)
+    dc.writeToAsicMemoryTop(0x94, 0x000f)
+
+    val out = for (dacValue <- 0x5000 until 0x5fff by 10) yield {
+      dc.writeToAsicMemoryTop(86, dacValue)
+      dc.readData(16).map(l => l.sum / 16)
+    }
+
+    ReferenceValueController.checkAdcLinearity(out)
   }
 
   private def adcChannelNoiseTest(): (Boolean, String) = {
