@@ -617,8 +617,120 @@ object ProbeTestController {
   }
 
   private def adcChannelNoiseTest(): (Boolean, String) = {
+
+    def mean(xs: List[Long]): Double = xs match {
+      case Nil => 0.0
+      case ys => ys.sum / ys.size.toDouble
+    }
+
+    def stddev(xs: List[Long], avg: Double): Double = xs match {
+      case Nil => 0.0
+      case ys => math.sqrt((0.0 /: ys) {
+        (a,e) => a + math.pow(e - avg, 2.0)
+      } / xs.size)
+    }
+
+    val out = Array.ofDim[Double](8)
+
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
-    (false, "Not Implemented Yet\n")
+    reset()
+    dc.initializeAsic()
+    dc.setFifosResets(0xff)
+
+    dc.writeToAsicMemoryTop(0x46, 0x0005)
+    dc.writeToAsicMemoryTop(0x10, 0x0040)
+    dc.writeToAsicMemoryTop(0x13, 0x0040)
+    dc.writeToAsicMemoryTop(0x22, 0x000e)
+    dc.writeToAsicMemoryTop(0x95, 0x0141)
+
+    dc.writeToAsicMemoryTop(0x85, 0x7000)
+    dc.writeToAsicMemoryTop(0x86, 0x7000)
+
+    dc.writeToAsicMemoryTop(0x24, 0x0880)
+    dc.writeToAsicMemoryTop(0x25, 0x0000)
+    dc.writeToAsicMemoryTop(0x26, 0x0233)
+    dc.writeToAsicMemoryTop(0x27, 0x01ff)
+    dc.writeToAsicMemoryTop(0x28, 0x0042)
+    dc.writeToAsicMemoryTop(0x29, 0x0057)
+    dc.writeToAsicMemoryTop(0x30, 0x7778)
+    dc.writeToAsicMemoryTop(0x88, 0x0880)
+    dc.writeToAsicMemoryTop(0x89, 0x0000)
+    dc.writeToAsicMemoryTop(0x90, 0x0233)
+    dc.writeToAsicMemoryTop(0x91, 0x01ff)
+    dc.writeToAsicMemoryTop(0x92, 0x0042)
+    dc.writeToAsicMemoryTop(0x93, 0x0057)
+    dc.writeToAsicMemoryTop(0x94, 0x7778)
+
+    val read3 = dc.readData(1024)
+
+    out(3) = stddev(read3(3).toList, mean(read3(3).toList))
+    out(7) = stddev(read3(7).toList, mean(read3(7).toList))
+
+    dc.writeToAsicMemoryTop(0x24, 0x0440)
+    dc.writeToAsicMemoryTop(0x25, 0x0000)
+    dc.writeToAsicMemoryTop(0x26, 0x0233)
+    dc.writeToAsicMemoryTop(0x27, 0x01ff)
+    dc.writeToAsicMemoryTop(0x28, 0x0042)
+    dc.writeToAsicMemoryTop(0x29, 0x005b)
+    dc.writeToAsicMemoryTop(0x30, 0xbbb4)
+    dc.writeToAsicMemoryTop(0x88, 0x0440)
+    dc.writeToAsicMemoryTop(0x89, 0x0000)
+    dc.writeToAsicMemoryTop(0x90, 0x0233)
+    dc.writeToAsicMemoryTop(0x91, 0x01ff)
+    dc.writeToAsicMemoryTop(0x92, 0x0042)
+    dc.writeToAsicMemoryTop(0x93, 0x005b)
+    dc.writeToAsicMemoryTop(0x94, 0xbbb4)
+
+    val read2 = dc.readData(1024)
+
+    out(2) = stddev(read2(2).toList, mean(read2(2).toList))
+    out(6) = stddev(read2(6).toList, mean(read2(6).toList))
+
+    dc.writeToAsicMemoryTop(0x24, 0x0220)
+    dc.writeToAsicMemoryTop(0x25, 0x0000)
+    dc.writeToAsicMemoryTop(0x26, 0x0233)
+    dc.writeToAsicMemoryTop(0x27, 0x01ff)
+    dc.writeToAsicMemoryTop(0x28, 0x0042)
+    dc.writeToAsicMemoryTop(0x29, 0x005d)
+    dc.writeToAsicMemoryTop(0x30, 0xddd2)
+    dc.writeToAsicMemoryTop(0x88, 0x0220)
+    dc.writeToAsicMemoryTop(0x89, 0x0000)
+    dc.writeToAsicMemoryTop(0x90, 0x0233)
+    dc.writeToAsicMemoryTop(0x91, 0x01ff)
+    dc.writeToAsicMemoryTop(0x92, 0x0042)
+    dc.writeToAsicMemoryTop(0x93, 0x005d)
+    dc.writeToAsicMemoryTop(0x94, 0xddd2)
+
+    val read1 = dc.readData(1024)
+
+    out(1) = stddev(read1(1).toList, mean(read1(1).toList))
+    out(5) = stddev(read1(5).toList, mean(read1(5).toList))
+
+    dc.writeToAsicMemoryTop(0x24, 0x0110)
+    dc.writeToAsicMemoryTop(0x25, 0x0000)
+    dc.writeToAsicMemoryTop(0x26, 0x0233)
+    dc.writeToAsicMemoryTop(0x27, 0x01ff)
+    dc.writeToAsicMemoryTop(0x28, 0x0042)
+    dc.writeToAsicMemoryTop(0x29, 0x005e)
+    dc.writeToAsicMemoryTop(0x30, 0xeee1)
+    dc.writeToAsicMemoryTop(0x88, 0x0110)
+    dc.writeToAsicMemoryTop(0x89, 0x0000)
+    dc.writeToAsicMemoryTop(0x90, 0x0233)
+    dc.writeToAsicMemoryTop(0x91, 0x01ff)
+    dc.writeToAsicMemoryTop(0x92, 0x0042)
+    dc.writeToAsicMemoryTop(0x93, 0x005e)
+    dc.writeToAsicMemoryTop(0x94, 0xeee1)
+
+    val read0 = dc.readData(1024)
+
+    out(0) = stddev(read0.head.toList, mean(read0.head.toList))
+    out(4) = stddev(read0(4).toList, mean(read0(4).toList))
+
+    val errors = new StringBuilder
+
+    for (i <- out.indices) if (out(i) > ReferenceValueController.noiseTreshold) errors.append("Channel " + i + " noise " + out(i) + "\n")
+
+    (errors.toString().isEmpty, errors.toString())
   }
 
   private def roicProgrammingTest(): (Boolean, String) = {
