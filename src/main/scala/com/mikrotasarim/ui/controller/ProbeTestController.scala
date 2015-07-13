@@ -395,7 +395,7 @@ object ProbeTestController {
     val out = dc.readData(16).map(l => l.sum / 16)
     val ref = Seq(3686, 5939, 10444, 12697, 12697, 10444, 5939, 3686)
     val errors = new StringBuilder
-    for (i <- 0) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + "\n")
+    for (i <- 0 to 7) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + "\n")
     (errors.toString().isEmpty, errors.toString())
   }
 
@@ -427,7 +427,7 @@ object ProbeTestController {
     val out = dc.readData(16).map(l => l.sum / 16)
     val ref = Seq(1433, 4812, 11571, 14950, 14950, 11571, 4812, 1433)
     val errors = new StringBuilder
-    for (i <- 0) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + "\n")
+    for (i <- 0 to 7) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + "\n")
     (errors.toString().isEmpty, errors.toString())
   }
 
@@ -460,7 +460,7 @@ object ProbeTestController {
     val out = dc.readData(16).map(l => l.sum / 16)
     val ref = Seq(3686, 5939, 10444, 12697, 12697, 10444, 5939, 3686)
     val errors = new StringBuilder
-    for (i <- 0) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + " in Stage 1\n")
+    for (i <- 0 to 7) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + " in Stage 1\n")
 
     dc.writeToAsicMemoryTop(0x46, 0x0005)
     dc.writeToAsicMemoryTop(0x10, 0x0040)
@@ -484,7 +484,7 @@ object ProbeTestController {
 
     val out2 = dc.readData(16).map(l => l.sum / 16)
     val ref2 = Seq(1433, 4812, 11571, 14950, 14950, 11571, 4812, 1433)
-    for (i <- 0) if (math.abs(out2(i) - ref2(i)) > 500) errors.append("Output " + i + " read " + out2(i) + " expected " + ref2(i) + " in Stage 2\n")
+    for (i <- 0 to 7) if (math.abs(out2(i) - ref2(i)) > 500) errors.append("Output " + i + " read " + out2(i) + " expected " + ref2(i) + " in Stage 2\n")
     (errors.toString().isEmpty, errors.toString())
   }
 

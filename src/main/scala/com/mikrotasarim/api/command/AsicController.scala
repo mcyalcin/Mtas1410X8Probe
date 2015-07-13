@@ -54,7 +54,7 @@ class AsicController(device: DeviceInterface) {
     setWiresAndTrigger(Map(
       commandWire -> writeToAsicMemoryTopCommand,
       addressWire -> address,
-      dataWire -> value + 0x100 * mask
+      dataWire -> (value + 0x100 * mask)
     ))
   }
 
