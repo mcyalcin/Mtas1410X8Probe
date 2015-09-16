@@ -206,5 +206,5 @@ object ApiConstants {
 
   val fpgaReset = 0
   val asicReset = 1
-  val fifoResetOffset = 2
+  val fifoResetOffset = 8
 }
