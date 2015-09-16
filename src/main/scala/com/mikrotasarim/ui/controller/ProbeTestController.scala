@@ -360,7 +360,7 @@ object ProbeTestController {
       val output = dc.readData(16)
       for (i <- 0 to 7) {
         val out = output(i).sum / 16
-        val ref = referenceValues(i - muxShift)
+        val ref = referenceValues((i - muxShift + 8) % 8)
         if (math.abs(out - ref) > 500) errors.append("Output " + i + " read " + out + " expected " + ref + " at mux shift " + muxShift + "\n")
       }
     }
