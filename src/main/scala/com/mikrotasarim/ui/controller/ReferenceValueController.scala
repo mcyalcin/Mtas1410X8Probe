@@ -6,7 +6,7 @@ object ReferenceValueController {
 
 //  val input = Source fromFile "ref.conf" getLines()
 
-  val noiseTreshold = 100
+  val noiseThreshold = 100
 
   def checkAdcLinearity(out: Seq[Seq[Long]]): (Boolean, String) = (false, "Not Implemented Yet\n")
 

@@ -728,7 +728,7 @@ object ProbeTestController {
 
     val errors = new StringBuilder
 
-    for (i <- out.indices) if (out(i) > ReferenceValueController.noiseTreshold) errors.append("Channel " + i + " noise " + out(i) + "\n")
+    for (i <- out.indices) if (out(i) > ReferenceValueController.noiseThreshold) errors.append("Channel " + i + " noise " + out(i) + "\n")
 
     (errors.toString().isEmpty, errors.toString())
   }
