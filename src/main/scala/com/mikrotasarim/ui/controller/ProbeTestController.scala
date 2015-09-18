@@ -80,7 +80,7 @@ object ProbeTestController {
     }
     for (i <- botAddresses) {
       dc.writeToAsicMemoryBot(i, 0xffff)
-      val read = dc.readFromAsicMemoryTop(i)
+      val read = dc.readFromAsicMemoryBot(i)
       for (j <- 0 to 15) {
         if ((read / (2 pow j)) % 2 != 1) {
           errors.append("Bottom (" + i + ", " + j + ") failed to toggle from 0 to 1\n")
