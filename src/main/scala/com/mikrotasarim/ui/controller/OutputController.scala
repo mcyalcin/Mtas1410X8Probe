@@ -29,9 +29,11 @@ object OutputController {
     var allTestsPassed = true
 
     for (testCase <- ProbeTestController.testCases) {
+      if (!testCase.message.value.isEmpty) {
+        writeStringToFile(new File(folder + "/" + testCase.name.filterNot(_==' ') + ".txt"), testCase.message.value)
+      }
       if (!testCase.testPassed.value) {
         allTestsPassed = false
-        writeStringToFile(new File(folder + testCase.name.filterNot(_==' ')), testCase.message.value)
       }
     }
 
