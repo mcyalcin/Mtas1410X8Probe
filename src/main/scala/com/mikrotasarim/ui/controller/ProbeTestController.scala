@@ -456,7 +456,7 @@ object ProbeTestController {
     dc.setFifosResets(0xff)
 
     val out = dc.readData(16).map(l => l.sum / 16)
-    val ref = Seq(3686, 5939, 10444, 12697, 14950, 11571, 4812, 1433)
+    val ref = Seq(1433, 4812, 11571, 14950, 14950, 11571, 4812, 1433)
     val errors = new StringBuilder
     for (i <- 0 to 7) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + "\n")
     (errors.toString().isEmpty, errors.toString())
