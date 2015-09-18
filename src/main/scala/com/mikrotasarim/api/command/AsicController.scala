@@ -8,13 +8,6 @@ class AsicController(device: DeviceInterface) {
 
   import ApiConstants._
 
-  private def checkErrorCode(errorCode: Long): Unit = {
-    errorCode % 65536 match {
-      case 0 =>
-      case default => throw new Exception("Unexpected error code: " + default)
-    }
-  }
-
   def waitForDeviceReady(): Unit = {
     do {
       device.updateWireOuts()
@@ -29,10 +22,6 @@ class AsicController(device: DeviceInterface) {
     device.updateWireIns()
     device.activateTriggerIn(triggerWire, 0)
     device.updateWireOuts()
-    //commented out by mustafa begin
-//    val errorCode = device.getWireOutValue(errorWire)
-//    checkErrorCode(errorCode)
-    //commented out by mustafa end
   }
 
   def initializeAsic(): Unit = {
