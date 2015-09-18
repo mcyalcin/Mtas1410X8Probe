@@ -47,7 +47,7 @@ object ProbeTestController {
   }
 
   private def serialInterfaceTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoicFast)
     reset()
     dc.initializeAsic()
     dc.writeToAsicMemoryTop(0x59, 0xabcd)
@@ -226,14 +226,23 @@ object ProbeTestController {
   }
 
   private def timingGeneratorTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoicFast)
     reset()
     dc.initializeAsic()
-    dc.writeToAsicMemoryTop(0x0a, 0x0040)
-    dc.writeToAsicMemoryTop(0x0d, 0x0040)
+    dc.writeToAsicMemoryTop(0x16, 0x0000)
+//    Thread.sleep(1000)
+    dc.writeToAsicMemoryTop(0x0a, 0x0010)
+//    Thread.sleep(1000)
+    dc.writeToAsicMemoryTop(0x0d, 0x0010)
+//    Thread.sleep(1000)
+    dc.writeToAsicMemoryTop(0x03, 0x0210)
+//    Thread.sleep(1000)
     dc.writeToAsicMemoryTop(0x16, 0x000e)
+//    Thread.sleep(1000)
+
     for (i <- 0 to 15) {
       val status = dc.readStatusRegister()
+      Thread.sleep(10)
       if (status % 4 != 3) return (false, status + "\n")
     }
     (true, "")
@@ -247,66 +256,124 @@ object ProbeTestController {
       if ((status / 4) % 2 != 1) true else false
     }).contains(true)
 
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile(fc.Bitfile.WithoutRoicFast)
     reset()
     dc.initializeAsic()
+    //commented out by mustafa
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0041, 0x00ff)
+//    dc.writeToAsicMemoryTopMasked(0x96, 0x0012, 0x00ff)
+//    dc.writeToAsicMemoryTop(0x102, 0)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+//    if (statusFail) errors.append("Failed at 80 Mhz\n")
+//
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0042, 0x00ff)
+//    dc.writeToAsicMemoryTopMasked(0x96, 0x0018, 0x00ff)
+//    dc.writeToAsicMemoryTop(0x102, 0)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+//    if (statusFail) errors.append("Failed at 100 Mhz\n")
+//
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0044, 0x00ff)
+//    dc.writeToAsicMemoryTopMasked(0x96, 0x0026, 0x00ff)
+//    dc.writeToAsicMemoryTop(0x102, 0)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+//    if (statusFail) errors.append("Failed at 140 Mhz\n")
+//
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0045, 0x00ff)
+//    dc.writeToAsicMemoryTopMasked(0x96, 0x002e, 0x00ff)
+//    dc.writeToAsicMemoryTop(0x102, 0)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+//    if (statusFail) errors.append("Failed at 160 Mhz\n")
+//
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0082, 0x00ff)
+//    dc.writeToAsicMemoryTopMasked(0x96, 0x0038, 0x00ff)
+//    dc.writeToAsicMemoryTop(0x102, 0x0202)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+//    if (statusFail) errors.append("Failed at 200 Mhz\n")
+//
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0085, 0x00ff)
+//    dc.writeToAsicMemoryTopMasked(0x96, 0x0058, 0x00ff)
+//    dc.writeToAsicMemoryTop(0x102, 0x0205)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+//    if (statusFail) errors.append("Failed at 320 Mhz\n")
+//
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0087, 0x00ff)
+//    dc.writeToAsicMemoryTopMasked(0x96, 0x0085, 0x00ff)
+//    dc.writeToAsicMemoryTop(0x102, 0x0205)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+//    if (statusFail) errors.append("Failed at 400 Mhz\n")
+//
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x008b, 0x00ff)
+//    dc.writeToAsicMemoryTopMasked(0x96, 0x00c9, 0x00ff)
+//    dc.writeToAsicMemoryTop(0x102, 0x0207)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+//    if (statusFail) errors.append("Failed at 560 Mhz\n")
+//    commented out by mustafa end
 
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0041, 0x00ff)
-    dc.writeToAsicMemoryTopMasked(0x96, 0x0012, 0x00ff)
-    dc.writeToAsicMemoryTop(0x102, 0)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+//      added by mustafa begin
+    dc.writeToAsicMemoryTopMasked(95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0041, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(96, 0x0012, 0x00ff)
+    dc.writeToAsicMemoryTop(102, 0)
+    dc.writeToAsicMemoryTopMasked(95, 0x0100, 0x0100)
     if (statusFail) errors.append("Failed at 80 Mhz\n")
 
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0042, 0x00ff)
-    dc.writeToAsicMemoryTopMasked(0x96, 0x0018, 0x00ff)
-    dc.writeToAsicMemoryTop(0x102, 0)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0042, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(96, 0x0018, 0x00ff)
+    dc.writeToAsicMemoryTop(102, 0)
+    dc.writeToAsicMemoryTopMasked(95, 0x0100, 0x0100)
     if (statusFail) errors.append("Failed at 100 Mhz\n")
 
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0044, 0x00ff)
-    dc.writeToAsicMemoryTopMasked(0x96, 0x0026, 0x00ff)
-    dc.writeToAsicMemoryTop(0x102, 0)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0044, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(96, 0x0026, 0x00ff)
+    dc.writeToAsicMemoryTop(102, 0)
+    dc.writeToAsicMemoryTopMasked(95, 0x0100, 0x0100)
     if (statusFail) errors.append("Failed at 140 Mhz\n")
 
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0045, 0x00ff)
-    dc.writeToAsicMemoryTopMasked(0x96, 0x002e, 0x00ff)
-    dc.writeToAsicMemoryTop(0x102, 0)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0045, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(96, 0x002e, 0x00ff)
+    dc.writeToAsicMemoryTop(102, 0)
+    dc.writeToAsicMemoryTopMasked(95, 0x0100, 0x0100)
     if (statusFail) errors.append("Failed at 160 Mhz\n")
 
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0082, 0x00ff)
-    dc.writeToAsicMemoryTopMasked(0x96, 0x0038, 0x00ff)
-    dc.writeToAsicMemoryTop(0x102, 0x0202)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0082, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(96, 0x0038, 0x00ff)
+    dc.writeToAsicMemoryTop(102, 0x0202)
+    dc.writeToAsicMemoryTopMasked(95, 0x0100, 0x0100)
     if (statusFail) errors.append("Failed at 200 Mhz\n")
 
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0085, 0x00ff)
-    dc.writeToAsicMemoryTopMasked(0x96, 0x0058, 0x00ff)
-    dc.writeToAsicMemoryTop(0x102, 0x0205)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0085, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(96, 0x0058, 0x00ff)
+    dc.writeToAsicMemoryTop(102, 0x0205)
+    dc.writeToAsicMemoryTopMasked(95, 0x0100, 0x0100)
     if (statusFail) errors.append("Failed at 320 Mhz\n")
 
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0087, 0x00ff)
-    dc.writeToAsicMemoryTopMasked(0x96, 0x0085, 0x00ff)
-    dc.writeToAsicMemoryTop(0x102, 0x0205)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0087, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(96, 0x0085, 0x00ff)
+    dc.writeToAsicMemoryTop(102, 0x0205)
+    dc.writeToAsicMemoryTopMasked(95, 0x0100, 0x0100)
     if (statusFail) errors.append("Failed at 400 Mhz\n")
 
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0000, 0x0100)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x008b, 0x00ff)
-    dc.writeToAsicMemoryTopMasked(0x96, 0x00c9, 0x00ff)
-    dc.writeToAsicMemoryTop(0x102, 0x0207)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x0000, 0x0100)
+    dc.writeToAsicMemoryTopMasked(95, 0x008b, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(96, 0x00c9, 0x00ff)
+    dc.writeToAsicMemoryTop(102, 0x0207)
+    dc.writeToAsicMemoryTopMasked(95, 0x0100, 0x0100)
     if (statusFail) errors.append("Failed at 560 Mhz\n")
-
+//        added by mustafa end
     (errors.toString().isEmpty, errors.toString())
   }
 
@@ -317,40 +384,92 @@ object ProbeTestController {
     reset()
     dc.initializeAsic()
     // stage1
-    dc.writeToAsicMemoryTop(0x1f, 0xaa3c)
-    dc.writeToAsicMemoryTop(0x2c, 0x552d)
-    dc.writeToAsicMemoryTopMasked(0x28, 0x0800, 0x0800)
+    dc.writeToAsicMemoryTop(0x1f, 0x2a3c)
+    dc.writeToAsicMemoryTop(0x2c, 0x1555)
+    //    mustafa begin
+    val test_val_0 = dc.readFromAsicMemoryTop(0x28)
+    //    mustafa end
+    dc.writeToAsicMemoryTopMasked(0x28, 0x2000, 0x2000)//mustafa changed here from dc.writeToAsicMemoryTopMasked(0x28, 0x0800, 0x0800)
+//    mustafa begin
+    val test_val_1 = dc.readFromAsicMemoryTop(0x28)
+    val test_val_2 = dc.readFromAsicMemoryTop(0x29)
+    dc.writeToPixelProcessorMemory(0,0);
+    dc.writeToPixelProcessorMemory(1,0);
+    dc.writeToPixelProcessorMemory(2,1);
+    dc.writeToPixelProcessorMemory(3,0);
+    dc.writeToPixelProcessorMemory(4,2);
+    dc.writeToPixelProcessorMemory(5,0);
+    dc.writeToPixelProcessorMemory(6,3);
+    dc.writeToPixelProcessorMemory(7,0);
+    dc.writeToPixelProcessorMemory(8,4);
+    dc.writeToPixelProcessorMemory(9,0);
+    dc.writeToPixelProcessorMemory(10,5);
+    dc.writeToPixelProcessorMemory(11,0);
+    dc.writeToPixelProcessorMemory(12,6);
+    dc.writeToPixelProcessorMemory(13,0);
+    dc.writeToPixelProcessorMemory(14,7);
+    dc.writeToPixelProcessorMemory(15,0);
+
+
+//    mustafa end
+
     dc.setFifosResets(0xff)
-    val outputs = dc.readData(1)
+    val outputs = dc.readData(512)//old 1
     for (i <- 0 until 3) {
-      if (outputs(i)(0) != 0xaa3c) errors.append("Top " + i + " fail: " + outputs(i)(0).toHexString + " read, 0xaa3c expected\n")
+      if (outputs(i)(0) != 0x2a3c) errors.append("Top " + i + " fail: " + outputs(i)(0).toHexString + " read, 0x2a3c expected\n")
     }
     for (i <- 0 until 3) {
-      if (outputs(i + 4)(0) != 0x552d) errors.append("Bottom " + i + " fail: " + outputs(i + 4)(0).toHexString + " read, 0x552d expected\n")
+      if (outputs(i + 4)(0) != 0x1555) errors.append("Bottom " + i + " fail: " + outputs(i + 4)(0).toHexString + " read, 0x1555 expected\n")
     }
     // stage2
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0041, 0x00ff)
-    dc.writeToAsicMemoryTopMasked(0x96, 0x0012, 0x00ff)
-    dc.writeToAsicMemoryTop(0x102, 0)
-    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
-    dc.writeToAsicMemoryTopMasked(0x40, 0x0000, 0xff00)
-    dc.writeToAsicMemoryTop(0x24, 0x0f00)
-    dc.writeToAsicMemoryTop(0x27, 0x01fe)
-    dc.writeToAsicMemoryTop(0x28, 0x0084)
-    dc.writeToAsicMemoryTop(0x29, 0x000f)
-    dc.writeToAsicMemoryTop(0x30, 0x0f0f)
-    dc.writeToAsicMemoryTop(0x88, 0x0ff0)
-    dc.writeToAsicMemoryTop(0x91, 0x01fe)
-    dc.writeToAsicMemoryTop(0x92, 0x0108)
-    dc.writeToAsicMemoryTop(0x93, 0x0050)
-    dc.writeToAsicMemoryTop(0x94, 0x000f)
-    dc.writeToAsicMemoryTop(0x10, 0x0040)
-    dc.writeToAsicMemoryTop(0x13, 0x0040)
-    dc.writeToAsicMemoryTop(0x22, 0x000e)
+    //commented out by mustafa begin
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0041, 0x00ff)
+//    dc.writeToAsicMemoryTopMasked(0x96, 0x0012, 0x00ff)
+//    dc.writeToAsicMemoryTop(0x102, 0)
+//    dc.writeToAsicMemoryTopMasked(0x95, 0x0100, 0x0100)
+//    dc.writeToAsicMemoryTopMasked(0x40, 0x0000, 0xff00)
+//    dc.writeToAsicMemoryTop(0x24, 0x0f00)
+//    dc.writeToAsicMemoryTop(0x27, 0x01fe)
+//    dc.writeToAsicMemoryTop(0x28, 0x0084)
+//    dc.writeToAsicMemoryTop(0x29, 0x000f)
+//    dc.writeToAsicMemoryTop(0x30, 0x0f0f)
+//    dc.writeToAsicMemoryTop(0x88, 0x0ff0)
+//    dc.writeToAsicMemoryTop(0x91, 0x01fe)
+//    dc.writeToAsicMemoryTop(0x92, 0x0108)
+//    dc.writeToAsicMemoryTop(0x93, 0x0050)
+//    dc.writeToAsicMemoryTop(0x94, 0x000f)
+//    dc.writeToAsicMemoryTop(0x10, 0x0040)
+//    dc.writeToAsicMemoryTop(0x13, 0x0040)
+//    dc.writeToAsicMemoryTop(0x22, 0x000e)
+    //commented out by mustafa end
+    //added by mustafa begin
+    dc.writeToAsicMemoryTopMasked(95, 0x0041, 0x00ff)
+    dc.writeToAsicMemoryTopMasked(96, 0x0012, 0x00ff)
+    dc.writeToAsicMemoryTop(102, 0)
+    dc.writeToAsicMemoryTopMasked(95, 0x0100, 0x0100)
+    dc.writeToAsicMemoryTopMasked(40, 0x0000, 0xff00)
+    dc.writeToAsicMemoryTop(24, 0x0f00)
+    dc.writeToAsicMemoryTop(27, 0x01fe)
+    dc.writeToAsicMemoryTop(28, 0x0084)
+    dc.writeToAsicMemoryTop(29, 0x000f)
+    dc.writeToAsicMemoryTop(30, 0x0f0f)
+    dc.writeToAsicMemoryTop(88, 0x0ff0)
+    dc.writeToAsicMemoryTop(91, 0x01fe)
+    dc.writeToAsicMemoryTop(92, 0x0108)
+    dc.writeToAsicMemoryTop(93, 0x0050)
+    dc.writeToAsicMemoryTop(94, 0x000f)
+    dc.writeToAsicMemoryTop(10, 0x0040)
+    dc.writeToAsicMemoryTop(13, 0x0040)
+    dc.writeToAsicMemoryTop(22, 0x000e)
+    //extra
+    dc.writeToAsicMemoryTop(28, 0x0021)
+    dc.writeToAsicMemoryTop(92, 0x0021)
+    //added by mustafa end
     dc.setFifosResets(0xff)
 
     val referenceValues = Seq(
-      3686, 5939, 10444, 12697, 14950, 11571, 4812, 1433
+      /*3686, 5939, 10444, 12697, 14950, 11571, 4812, 1433 */ //mustafa, for test purposes
+     8192, 8192, 8192, 8192, 8192, 8192,8192, 8192
     )
 
     for (muxShift <- 0 to 7) {
@@ -371,29 +490,56 @@ object ProbeTestController {
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
     reset()
     dc.initializeAsic()
-    dc.writeToAsicMemoryTop(0x46, 0x0005)
-    dc.writeToAsicMemoryTop(0x10, 0x0040)
-    dc.writeToAsicMemoryTop(0x13, 0x0040)
-    dc.writeToAsicMemoryTop(0x22, 0x000e)
-    dc.writeToAsicMemoryTop(0x95, 0x0141)
-    dc.writeToAsicMemoryTop(0x24, 0x0f00)
-    dc.writeToAsicMemoryTop(0x25, 0x0000)
-    dc.writeToAsicMemoryTop(0x26, 0x0233)
-    dc.writeToAsicMemoryTop(0x27, 0x01fe)
-    dc.writeToAsicMemoryTop(0x28, 0x0084)
-    dc.writeToAsicMemoryTop(0x29, 0x000f)
-    dc.writeToAsicMemoryTop(0x30, 0x0f0f)
-    dc.writeToAsicMemoryTop(0x88, 0x0f00)
-    dc.writeToAsicMemoryTop(0x89, 0x0000)
-    dc.writeToAsicMemoryTop(0x90, 0x0233)
-    dc.writeToAsicMemoryTop(0x91, 0x01fe)
-    dc.writeToAsicMemoryTop(0x92, 0x0084)
-    dc.writeToAsicMemoryTop(0x93, 0x000f)
-    dc.writeToAsicMemoryTop(0x94, 0x0f0f)
+    //commented out by mustafa begin
+//    dc.writeToAsicMemoryTop(0x46, 0x0005)
+//    dc.writeToAsicMemoryTop(0x10, 0x0040)
+//    dc.writeToAsicMemoryTop(0x13, 0x0040)
+//    dc.writeToAsicMemoryTop(0x22, 0x000e)
+//    dc.writeToAsicMemoryTop(0x95, 0x0141)
+//    dc.writeToAsicMemoryTop(0x24, 0x0f00)
+//    dc.writeToAsicMemoryTop(0x25, 0x0000)
+//    dc.writeToAsicMemoryTop(0x26, 0x0233)
+//    dc.writeToAsicMemoryTop(0x27, 0x01fe)
+//    dc.writeToAsicMemoryTop(0x28, 0x0084)
+//    dc.writeToAsicMemoryTop(0x29, 0x000f)
+//    dc.writeToAsicMemoryTop(0x30, 0x0f0f)
+//    dc.writeToAsicMemoryTop(0x88, 0x0f00)
+//    dc.writeToAsicMemoryTop(0x89, 0x0000)
+//    dc.writeToAsicMemoryTop(0x90, 0x0233)
+//    dc.writeToAsicMemoryTop(0x91, 0x01fe)
+//    dc.writeToAsicMemoryTop(0x92, 0x0084)
+//    dc.writeToAsicMemoryTop(0x93, 0x000f)
+//    dc.writeToAsicMemoryTop(0x94, 0x0f0f)
+    //commented out by mustafa end
+    //added by mustafa begin
+    dc.writeToAsicMemoryTop(46, 0x0005)
+    dc.writeToAsicMemoryTop(10, 0x0040)
+    dc.writeToAsicMemoryTop(13, 0x0040)
+    dc.writeToAsicMemoryTop(22, 0x000e)
+    dc.writeToAsicMemoryTop(95, 0x0141)
+    dc.writeToAsicMemoryTop(24, 0x0f00)
+    dc.writeToAsicMemoryTop(25, 0x0000)
+    dc.writeToAsicMemoryTop(26, 0x0233)
+    dc.writeToAsicMemoryTop(27, 0x01fe)
+    dc.writeToAsicMemoryTop(28, 0x0084)
+    dc.writeToAsicMemoryTop(29, 0x000f)
+    dc.writeToAsicMemoryTop(30, 0x0f0f)
+    dc.writeToAsicMemoryTop(88, 0x0f00)
+    dc.writeToAsicMemoryTop(89, 0x0000)
+    dc.writeToAsicMemoryTop(90, 0x0233)
+    dc.writeToAsicMemoryTop(91, 0x01fe)
+    dc.writeToAsicMemoryTop(92, 0x0084)
+    dc.writeToAsicMemoryTop(93, 0x000f)
+    dc.writeToAsicMemoryTop(94, 0x0f0f)
+    //extra
+    dc.writeToAsicMemoryTop(28, 0x0021)
+    dc.writeToAsicMemoryTop(92, 0x0021)
+    //added by mustafa end
     dc.setFifosResets(0xff)
 
     val out = dc.readData(16).map(l => l.sum / 16)
-    val ref = Seq(3686, 5939, 10444, 12697, 12697, 10444, 5939, 3686)
+    val ref = Seq(/*3686, 5939, 10444, 12697, 14950, 11571, 4812, 1433 */ //mustafa, for test purposes
+      8192, 8192, 8192, 8192, 8192, 8192,8192, 8192)
     val errors = new StringBuilder
     for (i <- 0 to 7) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + "\n")
     (errors.toString().isEmpty, errors.toString())
@@ -403,29 +549,56 @@ object ProbeTestController {
     fc.deployBitfile(fc.Bitfile.WithoutRoic)
     reset()
     dc.initializeAsic()
-    dc.writeToAsicMemoryTop(0x46, 0x0005)
-    dc.writeToAsicMemoryTop(0x10, 0x0040)
-    dc.writeToAsicMemoryTop(0x13, 0x0040)
-    dc.writeToAsicMemoryTop(0x22, 0x000e)
-    dc.writeToAsicMemoryTop(0x95, 0x0141)
-    dc.writeToAsicMemoryTop(0x24, 0x0ff0)
-    dc.writeToAsicMemoryTop(0x25, 0x0000)
-    dc.writeToAsicMemoryTop(0x26, 0x0233)
-    dc.writeToAsicMemoryTop(0x27, 0x01fe)
-    dc.writeToAsicMemoryTop(0x28, 0x0108)
-    dc.writeToAsicMemoryTop(0x29, 0x0050)
-    dc.writeToAsicMemoryTop(0x30, 0x000f)
-    dc.writeToAsicMemoryTop(0x88, 0x0ff0)
-    dc.writeToAsicMemoryTop(0x89, 0x0000)
-    dc.writeToAsicMemoryTop(0x90, 0x0233)
-    dc.writeToAsicMemoryTop(0x91, 0x01fe)
-    dc.writeToAsicMemoryTop(0x92, 0x0108)
-    dc.writeToAsicMemoryTop(0x93, 0x0050)
-    dc.writeToAsicMemoryTop(0x94, 0x000f)
+    //commented out by mustafa begin
+//    dc.writeToAsicMemoryTop(0x46, 0x0005)
+//    dc.writeToAsicMemoryTop(0x10, 0x0040)
+//    dc.writeToAsicMemoryTop(0x13, 0x0040)
+//    dc.writeToAsicMemoryTop(0x22, 0x000e)
+//    dc.writeToAsicMemoryTop(0x95, 0x0141)
+//    dc.writeToAsicMemoryTop(0x24, 0x0ff0)
+//    dc.writeToAsicMemoryTop(0x25, 0x0000)
+//    dc.writeToAsicMemoryTop(0x26, 0x0233)
+//    dc.writeToAsicMemoryTop(0x27, 0x01fe)
+//    dc.writeToAsicMemoryTop(0x28, 0x0108)
+//    dc.writeToAsicMemoryTop(0x29, 0x0050)
+//    dc.writeToAsicMemoryTop(0x30, 0x000f)
+//    dc.writeToAsicMemoryTop(0x88, 0x0ff0)
+//    dc.writeToAsicMemoryTop(0x89, 0x0000)
+//    dc.writeToAsicMemoryTop(0x90, 0x0233)
+//    dc.writeToAsicMemoryTop(0x91, 0x01fe)
+//    dc.writeToAsicMemoryTop(0x92, 0x0108)
+//    dc.writeToAsicMemoryTop(0x93, 0x0050)
+//    dc.writeToAsicMemoryTop(0x94, 0x000f)
+    //commented out by mustafa end
+    //added by mustafa begin
+    dc.writeToAsicMemoryTop(46, 0x0005)
+    dc.writeToAsicMemoryTop(10, 0x0040)
+    dc.writeToAsicMemoryTop(13, 0x0040)
+    dc.writeToAsicMemoryTop(22, 0x000e)
+    dc.writeToAsicMemoryTop(95, 0x0141)
+    dc.writeToAsicMemoryTop(24, 0x0ff0)
+    dc.writeToAsicMemoryTop(25, 0x0000)
+    dc.writeToAsicMemoryTop(26, 0x0233)
+    dc.writeToAsicMemoryTop(27, 0x01fe)
+    dc.writeToAsicMemoryTop(28, 0x0108)
+    dc.writeToAsicMemoryTop(29, 0x0050)
+    dc.writeToAsicMemoryTop(30, 0x000f)
+    dc.writeToAsicMemoryTop(88, 0x0ff0)
+    dc.writeToAsicMemoryTop(89, 0x0000)
+    dc.writeToAsicMemoryTop(90, 0x0233)
+    dc.writeToAsicMemoryTop(91, 0x01fe)
+    dc.writeToAsicMemoryTop(92, 0x0108)
+    dc.writeToAsicMemoryTop(93, 0x0050)
+    dc.writeToAsicMemoryTop(94, 0x000f)
+    //extra
+    dc.writeToAsicMemoryTop(28, 0x0021)
+    dc.writeToAsicMemoryTop(92, 0x0021)
+    //added by mustafa end
     dc.setFifosResets(0xff)
 
     val out = dc.readData(16).map(l => l.sum / 16)
-    val ref = Seq(1433, 4812, 11571, 14950, 14950, 11571, 4812, 1433)
+    val ref = Seq(/*3686, 5939, 10444, 12697, 14950, 11571, 4812, 1433 */ //mustafa, for test purposes
+      8192, 8192, 8192, 8192, 8192, 8192,8192, 8192)
     val errors = new StringBuilder
     for (i <- 0 to 7) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + "\n")
     (errors.toString().isEmpty, errors.toString())

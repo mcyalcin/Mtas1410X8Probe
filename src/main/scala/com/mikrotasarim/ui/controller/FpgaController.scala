@@ -13,10 +13,11 @@ object FpgaController {
 
   object Bitfile extends Enumeration {
     type Bitfile = Value
-    val None, WithoutRoic, WithRoic = Value
+    val None, WithoutRoicFast, WithoutRoic, WithRoic = Value
   }
 
   val bitfileMap = Map(
+    Bitfile.WithoutRoicFast -> "withoutRoicFast.bit",
     Bitfile.WithoutRoic -> "withoutRoic.bit",
     Bitfile.WithRoic -> "withRoic.bit"
   )

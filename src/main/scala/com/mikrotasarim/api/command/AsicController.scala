@@ -29,17 +29,21 @@ class AsicController(device: DeviceInterface) {
     device.updateWireIns()
     device.activateTriggerIn(triggerWire, 0)
     device.updateWireOuts()
-    val errorCode = device.getWireOutValue(errorWire)
-    checkErrorCode(errorCode)
+    //commented out by mustafa begin
+//    val errorCode = device.getWireOutValue(errorWire)
+//    checkErrorCode(errorCode)
+    //commented out by mustafa end
   }
 
   def initializeAsic(): Unit = {
     setWiresAndTrigger(Map(
       commandWire -> initializeAsicCommand
     ))
+    Thread.sleep(100)
     setWiresAndTrigger(Map(
       commandWire -> initializeAsicCommand
     ))
+    Thread.sleep(100)
   }
 
   def writeToAsicMemoryTop(address: Int, value: Long): Unit = {
@@ -54,7 +58,7 @@ class AsicController(device: DeviceInterface) {
     setWiresAndTrigger(Map(
       commandWire -> writeToAsicMemoryTopCommand,
       addressWire -> address,
-      dataWire -> (value + 0x100 * mask)
+      dataWire -> (value + 0x10000 * mask) // mustafa changed this from dataWire -> (value + 0x100 * mask)
     ))
   }
 
@@ -127,7 +131,7 @@ class AsicController(device: DeviceInterface) {
   }
 
   def setFifosResets(config: Int): Unit = {
-    device.setWireInValue(resetWire, config * 2 pow fifoResetOffset, 0xff * 2 pow fifoResetOffset)
+    device.setWireInValue(resetWire, config * (2 pow fifoResetOffset), 0xff * (2 pow fifoResetOffset))
     device.updateWireIns()
   }
 
@@ -159,7 +163,10 @@ class AsicController(device: DeviceInterface) {
         ((bytes((4 * i) + 3) + 256) % 256) * 256l * 256l * 256l
       }).toArray
     }
-
+//  mustafa begin
+    setFifosResets(0x00)
+    setFifosResets(0xff)
+//  mustafa end
     val lengthInBytes = length * 4
     setWiresAndTrigger(Map(
       commandWire -> readDataCommand,
