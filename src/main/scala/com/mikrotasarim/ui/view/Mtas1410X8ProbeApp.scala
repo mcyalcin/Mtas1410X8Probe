@@ -1,18 +1,18 @@
 package com.mikrotasarim.ui.view
 
+import com.mikrotasarim.ui.controller.ProbeTestController.OutputDelay
 import com.mikrotasarim.ui.controller.{FpgaController, OutputController, PowerSourceController, ProbeTestController}
 import com.mikrotasarim.ui.model.MemoryMap
+import org.controlsfx.dialog.Dialogs
 
+import scalafx.Includes._
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.beans.property.BooleanProperty
 import scalafx.geometry.Insets
-import scalafx.scene.{Node, Scene}
 import scalafx.scene.control._
-import scalafx.scene.layout.{VBox, HBox}
-import scalafx.Includes._
-
-import org.controlsfx.dialog.Dialogs
+import scalafx.scene.layout.{HBox, VBox}
+import scalafx.scene.{Node, Scene}
 
 object Mtas1410X8ProbeApp extends JFXApp {
 
@@ -61,6 +61,43 @@ object Mtas1410X8ProbeApp extends JFXApp {
           }
         )
       }
+    }
+  }
+
+  private def createDelayControls = new VBox {
+    spacing = 5
+    content = Label("Output Delays") +: model.outputDelays.map(createDelayControl)
+  }
+
+  private def createDelayControl(delay: OutputDelay): Node = {
+    new HBox {
+      spacing = 10
+      content = List(
+        new Label(delay.label) {
+          prefWidth = 50
+        },
+        new Slider {
+          min = 0
+          max = 7
+          snapToTicks = true
+          showTickMarks = true
+          majorTickUnit = 1
+          minorTickCount = 0
+          blockIncrement = 1
+          value <==> delay.delay
+        },
+        new Label {
+          text <== delay.delay.asString
+          prefWidth = 20
+        },
+        new Button("Commit") {
+          disable <== !delay.changed
+          onAction = () => delay.Commit()
+        },
+        new Button("Default") {
+          onAction = () => delay.Reset()
+        }
+      )
     }
   }
 
@@ -155,6 +192,8 @@ object Mtas1410X8ProbeApp extends JFXApp {
           new Label {text <== FpgaController.statusRegister}
         )
       },
+      new Separator,
+      createDelayControls,
       new Separator,
       new CheckBox("Self Test Mode") {
         selected <==> FpgaController.testMode

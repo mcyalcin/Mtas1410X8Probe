@@ -2,7 +2,50 @@ package com.mikrotasarim.ui.controller
 
 import com.mikrotasarim.ui.model.ProbeTestCase
 
+import scalafx.beans.property.{BooleanProperty, IntegerProperty}
+
 object ProbeTestController {
+
+  abstract class OutputDelay {
+    val label: String
+    val delay: IntegerProperty
+    val changed: BooleanProperty
+    def Commit(): Unit
+    def Reset(): Unit
+  }
+
+  class OutputDelayImpl(val label: String, val address: Int, val defaultValue: Int) extends OutputDelay {
+
+    def this(label: String, address: Int) = this(label, address, 0)
+
+    val delay = IntegerProperty(defaultValue)
+    var committedDelay = defaultValue
+    val changed = BooleanProperty(value = false)
+    delay.onChange(changed.value = committedDelay != delay.value)
+
+    def Commit() = {
+      committedDelay = delay.value
+      fc.deployBitfile(fc.Bitfile.WithoutRoic)
+      dc.writeToPixelProcessorMemory(address, delay.value)
+      changed.value = false
+    }
+
+    def Reset() = {
+      delay.value = defaultValue
+      if (committedDelay != defaultValue) Commit()
+    }
+  }
+
+  val outputDelays = Seq[OutputDelay](
+    new OutputDelayImpl("Top 0", 16+4),
+    new OutputDelayImpl("Top 1", 16+3),
+    new OutputDelayImpl("Top 2", 16+1),
+    new OutputDelayImpl("Top 3", 16+0),
+    new OutputDelayImpl("Bot 0", 16+11),
+    new OutputDelayImpl("Bot 1", 16+12),
+    new OutputDelayImpl("Bot 2", 16+14),
+    new OutputDelayImpl("Bot 3", 16+15)
+  )
 
   val testCases = Seq(
     new ProbeTestCase("Current Control Test", currentControlTest),
@@ -224,11 +267,42 @@ object ProbeTestController {
       currentS7i, currentS7j, currentS7k, currentS7l
     )
     val results = rvc.checkPower(currentSeq)
-    if (results.contains(false)) {
-      (false, "Not Implemented Yet\n") // TODO: Specify error output format
-    } else {
-      (true, "")
+
+    val message = new StringBuilder
+
+    val currentLabels = Seq(
+      "Stage 1: ",
+      "Stage 2: ",
+      "Stage 3: ",
+      "Stage 4: ",
+      "Stage 5: ",
+      "Stage 6a: ",
+      "Stage 6b: ",
+      "Stage 6c: ",
+      "Stage 6d: ",
+      "Stage 6e: ",
+      "Stage 6f: ",
+      "Stage 6g: ",
+      "Stage 6h: ",
+      "Stage 7a: ",
+      "Stage 7b: ",
+      "Stage 7c: ",
+      "Stage 7d: ",
+      "Stage 7e: ",
+      "Stage 7f: ",
+      "Stage 7g: ",
+      "Stage 7h: ",
+      "Stage 7i: ",
+      "Stage 7j: ",
+      "Stage 7k: ",
+      "Stage 7l: "
+    )
+
+    for (i <- currentLabels.indices) {
+      message.append(currentLabels(i) + currentSeq(i) + (if (results(i)) "\n" else "*\n"))
     }
+
+    (!results.contains(false), message.toString())
   }
 
   private def timingGeneratorTest(): (Boolean, String) = {
@@ -374,8 +448,9 @@ object ProbeTestController {
     dc.writeToAsicMemoryTop(92, 0x0108)
     dc.writeToAsicMemoryTop(93, 0x0050)
     dc.writeToAsicMemoryTop(94, 0x000f)
-    dc.writeToAsicMemoryTop(10, 0x0040)
-    dc.writeToAsicMemoryTop(13, 0x0040)
+    dc.writeToAsicMemoryTop(3, 0x0210)
+    dc.writeToAsicMemoryTop(10, 0x0010)
+    dc.writeToAsicMemoryTop(13, 0x0010)
     dc.writeToAsicMemoryTop(22, 0x000e)
 
     dc.setFifosResets(0xff)
@@ -403,8 +478,9 @@ object ProbeTestController {
     reset()
     dc.initializeAsic()
     dc.writeToAsicMemoryTop(46, 0x0005)
-    dc.writeToAsicMemoryTop(10, 0x0040)
-    dc.writeToAsicMemoryTop(13, 0x0040)
+    dc.writeToAsicMemoryTop(3, 0x0210)
+    dc.writeToAsicMemoryTop(10, 0x0010)
+    dc.writeToAsicMemoryTop(13, 0x0010)
     dc.writeToAsicMemoryTop(22, 0x000e)
     dc.writeToAsicMemoryTop(95, 0x0141)
     dc.writeToAsicMemoryTop(24, 0x0f00)
@@ -435,8 +511,9 @@ object ProbeTestController {
     reset()
     dc.initializeAsic()
     dc.writeToAsicMemoryTop(46, 0x0005)
-    dc.writeToAsicMemoryTop(10, 0x0040)
-    dc.writeToAsicMemoryTop(13, 0x0040)
+    dc.writeToAsicMemoryTop(3, 0x0210)
+    dc.writeToAsicMemoryTop(10, 0x0010)
+    dc.writeToAsicMemoryTop(13, 0x0010)
     dc.writeToAsicMemoryTop(22, 0x000e)
     dc.writeToAsicMemoryTop(95, 0x0141)
     dc.writeToAsicMemoryTop(24, 0x0ff0)
@@ -469,8 +546,9 @@ object ProbeTestController {
     dc.setFifosResets(0xff)
 
     dc.writeToAsicMemoryTop(46, 0x0005)
-    dc.writeToAsicMemoryTop(10, 0x0040)
-    dc.writeToAsicMemoryTop(13, 0x0040)
+    dc.writeToAsicMemoryTop(3, 0x0210)
+    dc.writeToAsicMemoryTop(10, 0x0010)
+    dc.writeToAsicMemoryTop(13, 0x0010)
     dc.writeToAsicMemoryTop(22, 0x000e)
     dc.writeToAsicMemoryTop(95, 0x0141)
     dc.writeToAsicMemoryTop(24, 0x0f00)
@@ -494,8 +572,9 @@ object ProbeTestController {
     for (i <- 0 to 7) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + " in Stage 1\n")
 
     dc.writeToAsicMemoryTop(46, 0x0005)
-    dc.writeToAsicMemoryTop(10, 0x0040)
-    dc.writeToAsicMemoryTop(13, 0x0040)
+    dc.writeToAsicMemoryTop(3, 0x0210)
+    dc.writeToAsicMemoryTop(10, 0x0010)
+    dc.writeToAsicMemoryTop(13, 0x0010)
     dc.writeToAsicMemoryTop(22, 0x000e)
     dc.writeToAsicMemoryTop(95, 0x0141)
     dc.writeToAsicMemoryTop(24, 0x0ff0)
@@ -529,9 +608,10 @@ object ProbeTestController {
     val ref = Array(Array(6182, 5177, 4172), Array(8192, 8192, 8192), Array(10311, 11371, 12431))
     val errors = new StringBuilder
 
+    dc.writeToAsicMemoryTop(3,0x0210)
     dc.writeToAsicMemoryTop(46, 0x0005)
-    dc.writeToAsicMemoryTop(10, 0x0040)
-    dc.writeToAsicMemoryTop(13, 0x0040)
+    dc.writeToAsicMemoryTop(10, 0x0010)
+    dc.writeToAsicMemoryTop(13, 0x0010)
     dc.writeToAsicMemoryTop(22, 0x000e)
     dc.writeToAsicMemoryTop(95, 0x0141)
     dc.writeToAsicMemoryTop(24, 0x0ff0)
@@ -671,9 +751,10 @@ object ProbeTestController {
     dc.initializeAsic()
     dc.setFifosResets(0xff)
 
+    dc.writeToAsicMemoryTop(3, 0x0210)
+    dc.writeToAsicMemoryTop(10, 0x0010)
+    dc.writeToAsicMemoryTop(13, 0x0010)
     dc.writeToAsicMemoryTop(46, 0x0005)
-    dc.writeToAsicMemoryTop(10, 0x0040)
-    dc.writeToAsicMemoryTop(13, 0x0040)
     dc.writeToAsicMemoryTop(22, 0x000e)
     dc.writeToAsicMemoryTop(95, 0x0141)
 
@@ -697,7 +778,7 @@ object ProbeTestController {
 
     val read3 = dc.readData(1024)
 
-    out(3) = stddev(read3(0).toList, mean(read3(0).toList))
+    out(3) = stddev(read3.head.toList, mean(read3.head.toList))
     out(7) = stddev(read3(7).toList, mean(read3(7).toList))
 
     dc.writeToAsicMemoryTop(24, 0x0440)
@@ -789,6 +870,8 @@ object ProbeTestController {
   }
 
   def runAll(): Unit = {
+    psc.outputOn()
+    Thread.sleep(5000)
     for (testCase <- testCases) testCase.runTest()
   }
 }
