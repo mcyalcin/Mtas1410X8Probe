@@ -152,10 +152,8 @@ class AsicController(device: DeviceInterface) {
         ((bytes((4 * i) + 3) + 256) % 256) * 256l * 256l * 256l
       }).toArray
     }
-//  mustafa begin
     setFifosResets(0x00)
     setFifosResets(0xff)
-//  mustafa end
     val lengthInBytes = length * 4
     setWiresAndTrigger(Map(
       commandWire -> readDataCommand,
