@@ -4,7 +4,7 @@ import com.mikrotasarim.ui.controller.FpgaController
 
 import scalafx.beans.property.StringProperty
 
-import com.mikrotasarim.ui.controller.FpgaController.{Bitfile, deviceController}
+import com.mikrotasarim.ui.controller.FpgaController.deviceController
 
 object MemoryMap {
 
@@ -12,8 +12,8 @@ object MemoryMap {
   val memoryLocationsBot = for (i <- 0 to 128) yield new MemoryLocationBot(i)
 
   def readAsicMemory(): Unit = {
-    if (FpgaController.deployedBitfile == Bitfile.None) {
-      FpgaController.deployBitfile(Bitfile.WithoutRoic)
+    if (FpgaController.deployedBitfile == "none") {
+      FpgaController.deployBitfile("withoutRoic.bit")
     }
     for (memoryLocation <- memoryLocationsTop) {
       memoryLocation.read()

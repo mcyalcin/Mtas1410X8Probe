@@ -2,7 +2,6 @@ package com.mikrotasarim.ui.controller
 
 import com.mikrotasarim.api.command.AsicController
 import com.mikrotasarim.api.device.{DeviceInterface, ConsoleMockDeviceInterface, OpalKellyInterface}
-import com.mikrotasarim.ui.controller.FpgaController.Bitfile.Bitfile
 
 import scalafx.beans.property.{BooleanProperty, StringProperty}
 
@@ -11,25 +10,14 @@ object FpgaController {
   var device: DeviceInterface = _
   var deviceController: AsicController = _
 
-  object Bitfile extends Enumeration {
-    type Bitfile = Value
-    val None, WithoutRoicFast, WithoutRoic, WithRoic = Value
-  }
+  var deployedBitfile = "none"
 
-  val bitfileMap = Map(
-    Bitfile.WithoutRoicFast -> "withoutRoicFast.bit",
-    Bitfile.WithoutRoic -> "withoutRoic.bit",
-    Bitfile.WithRoic -> "withRoic.bit"
-  )
-
-  var deployedBitfile: Bitfile = Bitfile.None
-
-  def deployBitfile(bf: Bitfile): Unit = {
+  def deployBitfile(bf: String): Unit = {
     if (bf != deployedBitfile) {
       if (testMode.value) {
         device = new ConsoleMockDeviceInterface()
       } else {
-        device = new OpalKellyInterface(bitfileMap(bf))
+        device = new OpalKellyInterface(bf)
       }
       deviceController = new AsicController(device)
       deployedBitfile = bf
@@ -37,7 +25,7 @@ object FpgaController {
   }
 
   def readStatusRegister(): Unit = {
-    if (deployedBitfile == Bitfile.None) deployBitfile(Bitfile.WithoutRoic)
+    if (deployedBitfile == "none") deployBitfile("withoutRoic.bit")
     val status = deviceController.readStatusRegister()
     statusRegister.set(status.toString)
   }

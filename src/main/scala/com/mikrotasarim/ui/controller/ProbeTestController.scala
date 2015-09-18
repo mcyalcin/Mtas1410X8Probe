@@ -25,7 +25,7 @@ object ProbeTestController {
 
     def Commit() = {
       committedDelay = delay.value
-      if (fc.deployedBitfile == fc.Bitfile.None) fc.deployBitfile(fc.Bitfile.WithoutRoic)
+      if (fc.deployedBitfile == "none") fc.deployBitfile("withoutRoic.bit")
       dc.writeToPixelProcessorMemory(address, delay.value)
       changed.value = false
     }
@@ -89,7 +89,7 @@ object ProbeTestController {
   }
 
   private def currentControlTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile("withoutRoic.bit")
     reset()
     val current = psc.measureCurrent()
     if (rvc.checkCurrent(current)) {
@@ -100,7 +100,7 @@ object ProbeTestController {
   }
 
   private def serialInterfaceTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoicFast)
+    fc.deployBitfile("withoutRoicFast.bit")
     reset()
     dc.initializeAsic()
     dc.writeToAsicMemoryTop(0x59, 0xabcd)
@@ -114,7 +114,7 @@ object ProbeTestController {
 
   private def memoryTest(): (Boolean, String) = {
     import spire.implicits._
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile("withoutRoic.bit")
     reset()
     dc.initializeAsic()
     val topAddresses = (0 to 255).filterNot(p => p == 0x6d || p == 0x74)
@@ -162,7 +162,7 @@ object ProbeTestController {
   }
 
   private def powerConsumptionTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile("withoutRoic.bit")
     reset()
     dc.putAsicOnReset()
     val currentS1 = psc.measureCurrent()
@@ -310,7 +310,7 @@ object ProbeTestController {
   }
 
   private def timingGeneratorTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoicFast)
+    fc.deployBitfile("withoutRoicFast.bit")
     reset()
     dc.initializeAsic()
     dc.writeToAsicMemoryTop(0x16, 0x0000)
@@ -336,7 +336,7 @@ object ProbeTestController {
       if ((status / 4) % 2 != 1) true else false
     }).contains(true)
 
-    fc.deployBitfile(fc.Bitfile.WithoutRoicFast)
+    fc.deployBitfile("withoutRoicFast.bit")
     reset()
     dc.initializeAsic()
 
@@ -403,14 +403,13 @@ object ProbeTestController {
   private def outputChannelTest(): (Boolean, String) = {
     val errors = new StringBuilder
 
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile("withoutRoic.bit")
     reset()
     dc.initializeAsic()
     applyOutputDelays()
 
     dc.writeToAsicMemoryTop(0x1f, 0x2a3c)
     dc.writeToAsicMemoryTop(0x2c, 0x1555)
-
 
     dc.writeToAsicMemoryTopMasked(0x28, 0x2000, 0x2000)
 
@@ -440,6 +439,11 @@ object ProbeTestController {
       if (outputs(i + 4)(0) != 0x1555) errors.append("Bottom " + i + " fail: " + outputs(i + 4)(0).toHexString + " read, 0x1555 expected\n")
     }
 
+    dc.writeToAsicMemoryTop(22, 0x0000)
+    dc.writeToAsicMemoryTop(3, 0x0210)
+    dc.writeToAsicMemoryTop(10, 0x0010)
+    dc.writeToAsicMemoryTop(13, 0x0010)
+    dc.writeToAsicMemoryTop(22, 0x000e)
     dc.writeToAsicMemoryTopMasked(95, 0x0041, 0x00ff)
     dc.writeToAsicMemoryTopMasked(96, 0x0012, 0x00ff)
     dc.writeToAsicMemoryTop(102, 0)
@@ -455,10 +459,6 @@ object ProbeTestController {
     dc.writeToAsicMemoryTop(92, 0x0108)
     dc.writeToAsicMemoryTop(93, 0x0050)
     dc.writeToAsicMemoryTop(94, 0x000f)
-    dc.writeToAsicMemoryTop(3, 0x0210)
-    dc.writeToAsicMemoryTop(10, 0x0010)
-    dc.writeToAsicMemoryTop(13, 0x0010)
-    dc.writeToAsicMemoryTop(22, 0x000e)
 
     dc.setFifosResets(0xff)
 
@@ -481,11 +481,12 @@ object ProbeTestController {
   }
 
   private def adcChannelFunctionalityTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile("withoutRoic.bit")
     reset()
     dc.initializeAsic()
     applyOutputDelays()
     dc.writeToAsicMemoryTop(46, 0x0005)
+    dc.writeToAsicMemoryTop(22, 0x0000)
     dc.writeToAsicMemoryTop(3, 0x0210)
     dc.writeToAsicMemoryTop(10, 0x0010)
     dc.writeToAsicMemoryTop(13, 0x0010)
@@ -515,11 +516,12 @@ object ProbeTestController {
   }
 
   private def pgaFunctionalityTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile("withoutRoic.bit")
     reset()
     dc.initializeAsic()
     applyOutputDelays()
     dc.writeToAsicMemoryTop(46, 0x0005)
+    dc.writeToAsicMemoryTop(22, 0x0000)
     dc.writeToAsicMemoryTop(3, 0x0210)
     dc.writeToAsicMemoryTop(10, 0x0010)
     dc.writeToAsicMemoryTop(13, 0x0010)
@@ -549,13 +551,14 @@ object ProbeTestController {
   }
 
   private def inputDriverTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile("withoutRoic.bit")
     reset()
     dc.initializeAsic()
     applyOutputDelays()
     dc.setFifosResets(0xff)
 
     dc.writeToAsicMemoryTop(46, 0x0005)
+    dc.writeToAsicMemoryTop(22, 0x0000)
     dc.writeToAsicMemoryTop(3, 0x0210)
     dc.writeToAsicMemoryTop(10, 0x0010)
     dc.writeToAsicMemoryTop(13, 0x0010)
@@ -582,6 +585,7 @@ object ProbeTestController {
     for (i <- 0 to 7) if (math.abs(out(i) - ref(i)) > 500) errors.append("Output " + i + " read " + out(i) + " expected " + ref(i) + " in Stage 1\n")
 
     dc.writeToAsicMemoryTop(46, 0x0005)
+    dc.writeToAsicMemoryTop(22, 0x0000)
     dc.writeToAsicMemoryTop(3, 0x0210)
     dc.writeToAsicMemoryTop(10, 0x0010)
     dc.writeToAsicMemoryTop(13, 0x0010)
@@ -609,7 +613,7 @@ object ProbeTestController {
   }
 
   private def pgaGainTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile("withoutRoic.bit")
     reset()
     dc.initializeAsic()
     applyOutputDelays()
@@ -619,6 +623,7 @@ object ProbeTestController {
     val ref = Array(Array(6182, 5177, 4172), Array(8192, 8192, 8192), Array(10311, 11371, 12431))
     val errors = new StringBuilder
 
+    dc.writeToAsicMemoryTop(22, 0x0000)
     dc.writeToAsicMemoryTop(3,0x0210)
     dc.writeToAsicMemoryTop(46, 0x0005)
     dc.writeToAsicMemoryTop(10, 0x0010)
@@ -705,7 +710,7 @@ object ProbeTestController {
   }
 
   private def adcChannelLinearityTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile("withoutRoic.bit")
     reset()
     dc.initializeAsic()
     applyOutputDelays()
@@ -758,12 +763,13 @@ object ProbeTestController {
 
     val out = Array.ofDim[Double](8)
 
-    fc.deployBitfile(fc.Bitfile.WithoutRoic)
+    fc.deployBitfile("withoutRoic.bit")
     reset()
     dc.initializeAsic()
     applyOutputDelays()
     dc.setFifosResets(0xff)
 
+    dc.writeToAsicMemoryTop(22, 0x0000)
     dc.writeToAsicMemoryTop(3, 0x0210)
     dc.writeToAsicMemoryTop(10, 0x0010)
     dc.writeToAsicMemoryTop(13, 0x0010)
@@ -866,7 +872,7 @@ object ProbeTestController {
   }
 
   private def roicProgrammingTest(): (Boolean, String) = {
-    fc.deployBitfile(fc.Bitfile.WithRoic)
+    fc.deployBitfile("withRoic.bit")
     reset()
     dc.initializeAsic()
 
