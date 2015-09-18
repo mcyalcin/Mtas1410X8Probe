@@ -16,7 +16,7 @@ object ReferenceValueController {
   val powerRef = for (i <- 0 until 25) yield powerInput.next().toDouble
   
   val linearityMargin = linearityInput.next().toDouble
-  val linearityRef = for (i <- 0 until 4096) yield linearityInput.next().toDouble
+  val linearityRef = for (i <- 0 until 410) yield linearityInput.next().toDouble
   
   val noiseThreshold = noiseInput.next().toDouble
 
@@ -24,13 +24,13 @@ object ReferenceValueController {
     var pass = true
     val values = new StringBuilder
     for (i <- linearityRef.indices) {
-      values.append(linearityRef(i) + " ->\t")
+      values.append(linearityRef(i) + " -> \t")
       for (c <- 0 to 7) {
         if (Math.abs(out(i)(c)-linearityRef(i)) > linearityMargin) {
-          values.append(out(i)(c) + "*\t")
+          values.append(out(i)(c) + "* \t")
           pass = false
         } else {
-          values.append(out(i)(c) + "\t")
+          values.append(out(i)(c) + " \t")
         }
       }
       values.append("\n")

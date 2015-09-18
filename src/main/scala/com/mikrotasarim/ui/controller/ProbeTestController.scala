@@ -18,7 +18,8 @@ object ProbeTestController {
     new ProbeTestCase("PGA Gain Test", pgaGainTest),
     new ProbeTestCase("ADC Channel Linearity Test", adcChannelLinearityTest),
     new ProbeTestCase("ADC Channel Noise Test", adcChannelNoiseTest),
-    new ProbeTestCase("ROIC Programming Test", roicProgrammingTest)
+    new ProbeTestCase("ROIC Programming Test", roicProgrammingTest),
+    new ProbeTestCase("Camlink Interface Test", camlinkInterfaceTest)
   )
 
   val fc = FpgaController
@@ -33,6 +34,11 @@ object ProbeTestController {
     dc.putFpgaOnReset()
     dc.takeFpgaOffReset()
     dc.takeAsicOffReset()
+  }
+
+  private def camlinkInterfaceTest(): (Boolean, String) = {
+    // TODO: Do stuff here
+    (false, "Not Implemented Yet\n")
   }
 
   private def currentControlTest(): (Boolean, String) = {
@@ -614,8 +620,10 @@ object ProbeTestController {
     dc.setFifosResets(0xff)
 
     dc.writeToAsicMemoryTop(46, 0x0005)
-    dc.writeToAsicMemoryTop(10, 0x0040)
-    dc.writeToAsicMemoryTop(13, 0x0040)
+    dc.writeToAsicMemoryTop(3, 0x0210)
+    dc.writeToAsicMemoryTop(22, 0x0000)
+    dc.writeToAsicMemoryTop(10, 0x0010)
+    dc.writeToAsicMemoryTop(13, 0x0010)
     dc.writeToAsicMemoryTop(22, 0x000e)
     dc.writeToAsicMemoryTop(95, 0x0141)
     dc.writeToAsicMemoryTop(24, 0x0ff0)
@@ -635,6 +643,7 @@ object ProbeTestController {
 
     val out = for (dacValue <- 0x5000 until 0x5fff by 10) yield {
       dc.writeToAsicMemoryTop(86, dacValue)
+      dc.writeToAsicMemoryTop(87, 0x5800)
       dc.readData(16).map(l => l.sum / 16)
     }
 
@@ -688,7 +697,7 @@ object ProbeTestController {
 
     val read3 = dc.readData(1024)
 
-    out(3) = stddev(read3(3).toList, mean(read3(3).toList))
+    out(3) = stddev(read3(0).toList, mean(read3(0).toList))
     out(7) = stddev(read3(7).toList, mean(read3(7).toList))
 
     dc.writeToAsicMemoryTop(24, 0x0440)
@@ -708,7 +717,7 @@ object ProbeTestController {
 
     val read2 = dc.readData(1024)
 
-    out(2) = stddev(read2(2).toList, mean(read2(2).toList))
+    out(2) = stddev(read2(1).toList, mean(read2(1).toList))
     out(6) = stddev(read2(6).toList, mean(read2(6).toList))
 
     dc.writeToAsicMemoryTop(24, 0x0220)
@@ -728,7 +737,7 @@ object ProbeTestController {
 
     val read1 = dc.readData(1024)
 
-    out(1) = stddev(read1(1).toList, mean(read1(1).toList))
+    out(1) = stddev(read1(2).toList, mean(read1(2).toList))
     out(5) = stddev(read1(5).toList, mean(read1(5).toList))
 
     dc.writeToAsicMemoryTop(24, 0x0110)
@@ -748,14 +757,18 @@ object ProbeTestController {
 
     val read0 = dc.readData(1024)
 
-    out(0) = stddev(read0.head.toList, mean(read0.head.toList))
+    out(0) = stddev(read0(3).toList, mean(read0(3).toList))
     out(4) = stddev(read0(4).toList, mean(read0(4).toList))
 
-    val errors = new StringBuilder
+    var pass = true
 
-    for (i <- out.indices) if (out(i) > ReferenceValueController.noiseThreshold) errors.append("Channel " + i + " noise " + out(i) + "\n")
+    for (i <- out.indices) if (out(i) > ReferenceValueController.noiseThreshold) pass = false
 
-    (errors.toString().isEmpty, errors.toString())
+    val message = new StringBuilder
+
+    for (i <- out.indices) message.append("Channel " + i + " noise: " + out(i) + "\n")
+
+    (pass, message.toString())
   }
 
   private def roicProgrammingTest(): (Boolean, String) = {
