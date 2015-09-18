@@ -384,7 +384,7 @@ object ProbeTestController {
       3686, 5939, 10444, 12697, 14950, 11571, 4812, 1433
     )
 
-    for (muxShift <- 0 to 7) {
+    for (muxShift <- 8 to 1 by -1) {
       for (outputIndex <- 0 to 7) {
         dc.writeToPixelProcessorMemory(2*outputIndex, (outputIndex - muxShift) % 8)
       }
