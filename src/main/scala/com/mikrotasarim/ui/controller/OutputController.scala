@@ -3,6 +3,8 @@ package com.mikrotasarim.ui.controller
 import java.io.{FileWriter, File}
 import java.text.SimpleDateFormat
 
+import com.mikrotasarim.ui.controller.FpgaController.Bitfile
+
 import scala.collection.mutable
 import scalax.file.Path
 import scalafx.beans.property.StringProperty
@@ -62,6 +64,7 @@ object OutputController {
     }
 
     PowerSourceController.outputOff()
+    FpgaController.deployedBitfile = Bitfile.None
 
     dieNumber.value = (dieNumber.value.toInt + 1).toString
   }

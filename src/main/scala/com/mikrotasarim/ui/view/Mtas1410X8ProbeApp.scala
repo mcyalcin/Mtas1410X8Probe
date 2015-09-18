@@ -1,5 +1,6 @@
 package com.mikrotasarim.ui.view
 
+import com.mikrotasarim.ui.controller.FpgaController.Bitfile
 import com.mikrotasarim.ui.controller.ProbeTestController.OutputDelay
 import com.mikrotasarim.ui.controller.{FpgaController, OutputController, PowerSourceController, ProbeTestController}
 import com.mikrotasarim.ui.model.MemoryMap
@@ -154,6 +155,7 @@ object Mtas1410X8ProbeApp extends JFXApp {
           new Button("Off") {
             onAction = handle {
               PowerSourceController.outputOff()
+              FpgaController.deployedBitfile = Bitfile.None
             }
           }
         )
