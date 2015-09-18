@@ -601,7 +601,7 @@ object ProbeTestController {
         for (output <- 0 to 7) {
           val o = out(stage)(gain)(output)
           val r = ref(stage)(gain)
-          if (math.abs(o-r) > 200) errors.append("Output " + output + " read " + o + " expected " + r + " at stage " + (stage + 1) + " with " + g(gain) + " gain\n")
+          if (math.abs(o-r) > 500) errors.append("Output " + output + " read " + o + " expected " + r + " at stage " + (stage + 1) + " with " + g(gain) + " gain\n")
         }
 
     (errors.toString().isEmpty, errors.toString())
